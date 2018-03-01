@@ -1,0 +1,20 @@
+<table>
+  <thead>
+    <tr>
+    <th>Пара</th>
+    <td>Yobit</th>
+    <th>Binance</th>
+    <th>Разница</th>
+  </tr>
+  </thead>
+  <tbody>
+  <% @arbitrage.result.each do |pair, prices| %>
+    <tr>
+      <td><%= pair %></td>
+      <td><%= prices[:yobit] %></td>
+      <td><%= prices[:binance] %></td>
+      <td><%= prices[:diffrence] %></td>
+    </tr>
+  <%end%>
+  </tbody>
+</table>
