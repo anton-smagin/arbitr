@@ -10,7 +10,7 @@ class Arbitrage
           }
       end
 
-      arbitrage.result = statistic.sort_by{ |diff|  diff[1][:diffrence] }.to_h
+      arbitrage.result = statistic.sort_by{ |diff|  diff[1][:diffrence] }.reverse.to_h
     end
   end
 
