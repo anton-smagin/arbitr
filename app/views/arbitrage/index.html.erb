@@ -2,7 +2,7 @@
   <thead>
     <tr>
     <th>Пара</th>
-    <th>Yobit</th>
+    <th>Kucoin</th>
     <th>Binance</th>
     <th>Разница</th>
   </tr>
@@ -11,7 +11,7 @@
   <% @arbitrage.result.each do |pair, prices| %>
     <tr>
       <td><%= pair %></td>
-      <td><%= prices[:yobit] %></td>
+      <td><%= prices[:kucoin] %></td>
       <td><%= prices[:binance] %></td>
       <td><%= prices[:diffrence] %></td>
     </tr>

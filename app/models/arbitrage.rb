@@ -1,10 +1,10 @@
 class Arbitrage
   def self.call
     new.tap do |arbitrage|
-      statistic = arbitrage.yobit_prices.each_with_object({}) do |(pair, price), result|
+      statistic = arbitrage.kucoin_prices.each_with_object({}) do |(pair, price), result|
         result[pair] =
           {
-            yobit: price,
+            kucoin: price,
             binance: arbitrage.binance_prices[pair],
             diffrence: ((price / arbitrage.binance_prices[pair]) * 100.0 - 100.0).abs
           }
@@ -22,5 +22,11 @@ class Arbitrage
 
   def binance_prices
     @binance_prices ||= Binance.new.prices
+  end
+
+  def kucoin_prices
+    @kucoun_prices ||= Kucoin.new.prices.select do |pair, _price|
+      binance_prices.keys.include? pair
+    end
   end
 end

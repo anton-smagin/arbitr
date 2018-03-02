@@ -1,8 +1,8 @@
 class Yobit
   def prices
-    obtain_prices.map{|k, v|
+    obtain_prices.map do |k, v|
       [k.upcase.delete('_'), v['last']]
-    }.to_h
+    end.to_h
   end
 
   def obtain_prices
