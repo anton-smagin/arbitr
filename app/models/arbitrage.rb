@@ -10,7 +10,7 @@ class Arbitrage
           }
       end
 
-      arbitrage.result = statistic.sort_by{ |diff|  diff[1][:diffrence] }.reverse.to_h
+      arbitrage.result = statistic.sort_by { |diff| diff[1][:diffrence] }.reverse.to_h
     end
   end
 
@@ -25,8 +25,11 @@ class Arbitrage
   end
 
   def kucoin_prices
-    @kucoun_prices ||= Kucoin.new.prices.select do |pair, _price|
-      binance_prices.keys.include? pair
+    @kucoun_prices ||= begin
+      pairs = binance_prices.keys
+      Kucoin.new.prices.select do |pair, _price|
+        pairs.include?(pair) && pair.include?('BTC')
+      end
     end
   end
 end
