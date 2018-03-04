@@ -62,7 +62,7 @@ class Kucoin
     query_string = URI.encode_www_form(payload.sort.to_h)
     {
       'KC-API-KEY' => api_key,
-      'KC-API-NONCE' => nonce,
+      'KC-API-NONCE' => timestamp,
       'KC-API-SIGNATURE' => signature(endpoint, query_string),
       'Content-Type' => 'application/json'
     }
@@ -70,12 +70,12 @@ class Kucoin
 
   def signature(endpoint, query_string)
     #  Arrange the parameters in ascending alphabetical order(lower cases first)
-    string = "#{endpoint}/#{nonce}/#{query_string}"
+    string = "#{endpoint}/#{timestamp}/#{query_string}"
     base64 = Base64.strict_encode64(string)
     OpenSSL::HMAC.hexdigest(OpenSSL::Digest.new('sha256'), api_secret, base64)
   end
 
-  def nonce
+  def timestamp
     (Time.now.to_f * 1000).to_i.to_s
   end
 
