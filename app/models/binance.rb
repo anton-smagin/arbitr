@@ -9,8 +9,34 @@ class Binance
     end.to_h
   end
 
+  def price(symbol, direction)
+    direction = direction == 'buy' ? 'bidPrice' : 'askPrice'
+    HTTParty.get(
+      "#{HOST}/api/v3/ticker/bookTicker",
+      query: { symbol: binance_pair_reprosintation(symbol) }
+    )[direction]
+  end
+
+  def withdraw(coin, amount, address)
+    HTTParty.post(
+      "#{HOST}/wapi/v3/withdraw.html",
+      headers: headers,
+      query: signed_params(asset: coin.upcase, address: address, amount: amount)
+      )
+  end
+
+  def deposit_address(coin)
+    HTTParty.get(
+      "#{HOST}/wapi/v3/depositAddress.html",
+      headers: headers,
+      query: signed_params(asset: coin.upcase)
+    )['address']
+  end
+
   def balance(coin)
-    account_info['balances'].find{ |balance| balance['asset'] == coin }['free']
+    account_info['balances'].find do |balance|
+      balance['asset'] == coin.upcase
+    end['free']
   end
 
   def account_info
@@ -24,13 +50,13 @@ class Binance
   private
 
   def signed_params(payload = {})
-    timestamped_params = { 'timestamp' => timestamp, **payload }
-    query_string = URI.encode_www_form(timestamped_params.sort.to_h)
-    "#{query_string}&signature=#{signature(query_string)}"
+    timestamped_params = { timestamp: timestamp, **payload }.sort.to_h
+    query_string = URI.encode_www_form(timestamped_params)
+    {**timestamped_params.sort.to_h, signature: signature(query_string)}
   end
 
   def timestamp
-    (Time.now.to_f * 1000).to_i.to_s
+    (Time.now.to_i * 1000).to_s
   end
 
   def headers
@@ -41,6 +67,10 @@ class Binance
     OpenSSL::HMAC.hexdigest(
       OpenSSL::Digest.new('sha256'), api_secret, query_string
     )
+  end
+
+  def binance_pair_reprosintation(pair)
+    pair.delete('_').delete('-').upcase
   end
 
   def api_key

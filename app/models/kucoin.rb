@@ -21,7 +21,7 @@ class Kucoin
   end
 
   def deposit_address(coin)
-    endpoint = "/v1/account/#{coin}/wallet/address"
+    endpoint = "/v1/account/#{coin.upcase}/wallet/address"
     HTTParty.get(
       "#{HOST}#{endpoint}",
       headers: headers(endpoint)
@@ -36,13 +36,17 @@ class Kucoin
             end.to_h
   end
 
-  def price(pair, type)
-    HTTParty.get("#{HOST}/v1/#{pair}/open/tick")['data'][type]
+  def price(pair, direction)
+    kucoin_pair = kucoin_pair_representation(pair)
+    HTTParty.get("#{HOST}/v1/#{kucoin_pair}/open/tick")['data'][direction]
   end
 
   def balance(coin)
-    endpoint = "/v1/account/#{coin}/balance"
-    HTTParty.get("#{HOST}#{endpoint}", headers: headers(endpoint))
+    endpoint = "/v1/account/#{coin.upcase}/balance"
+    HTTParty.get(
+      "#{HOST}#{endpoint}",
+      headers: headers(endpoint)
+    )['data']['balance']
   end
 
   private
@@ -80,7 +84,7 @@ class Kucoin
   end
 
   def kucoin_pair_representation(pair)
-    pair[-4] == '-' ? pair : pair.insert(-4, '-')
+    (pair[-4] == '-' ? pair : pair.insert(-4, '-')).upcase
   end
 
   def api_key
