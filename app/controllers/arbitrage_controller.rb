@@ -1,5 +1,5 @@
 class ArbitrageController < ApplicationController
   def index
-    @arbitrage = Arbitrage.call
+    @arbitrage = ArbitrageOpportunity.call
   end
 end

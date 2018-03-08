@@ -1,6 +1,15 @@
 # working with binance market
 class Binance
   HOST = 'https://api.binance.com'.freeze
+
+  def buy(symbol, amount)
+    make_order(binance_symbol_reprosintation(symbol), 'BUY', amount)
+  end
+
+  def sell(symbol, amount)
+    make_order(binance_symbol_reprosintation(symbol), 'SELL', amount)
+  end
+
   def prices
     HTTParty.get("#{HOST}/api/v3/ticker/price")
             .parsed_response
@@ -10,10 +19,10 @@ class Binance
   end
 
   def price(symbol, direction)
-    direction = direction == 'buy' ? 'bidPrice' : 'askPrice'
+    direction = direction.casecmp('buy').zero? ? 'bidPrice' : 'askPrice'
     HTTParty.get(
       "#{HOST}/api/v3/ticker/bookTicker",
-      query: { symbol: binance_pair_reprosintation(symbol) }
+      query: { symbol: binance_symbol_reprosintation(symbol) }
     )[direction]
   end
 
@@ -22,7 +31,7 @@ class Binance
       "#{HOST}/wapi/v3/withdraw.html",
       headers: headers,
       query: signed_params(asset: coin.upcase, address: address, amount: amount)
-      )
+    )
   end
 
   def deposit_address(coin)
@@ -49,10 +58,24 @@ class Binance
 
   private
 
+  def make_order(symbol, type, amount)
+    HTTParty.post(
+      "#{HOST}/api/v3/order",
+      headers: headers,
+      query: {
+        symbol: symbol,
+        side: type,
+        type: 'MARKET',
+        quantity: amount,
+        price: price(symbol, type)
+      }
+    )
+  end
+
   def signed_params(payload = {})
     timestamped_params = { timestamp: timestamp, **payload }.sort.to_h
     query_string = URI.encode_www_form(timestamped_params)
-    {**timestamped_params.sort.to_h, signature: signature(query_string)}
+    { **timestamped_params.sort.to_h, signature: signature(query_string) }
   end
 
   def timestamp
@@ -69,8 +92,8 @@ class Binance
     )
   end
 
-  def binance_pair_reprosintation(pair)
-    pair.delete('_').delete('-').upcase
+  def binance_symbol_reprosintation(symbol)
+    symbol.delete('_').delete('-').upcase
   end
 
   def api_key

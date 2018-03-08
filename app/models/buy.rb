@@ -1,0 +1,3 @@
+class Buy < ApplicationRecord
+
+end
