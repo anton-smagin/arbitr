@@ -11,8 +11,8 @@ class Binance
   end
 
   def prices
-    public_get('/api/v3/ticker/price').parsed_response.map do |price|
-      [price['symbol'], price['price'].to_f]
+    public_get('/api/v1/ticker/24hr').parsed_response.map do |price|
+      [ price['symbol'], { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f } ]
     end.to_h
   end
 
@@ -41,7 +41,7 @@ class Binance
     get('/api/v3/account')
   end
 
-  private
+  #private
 
   def make_order(symbol, type, amount)
     post(

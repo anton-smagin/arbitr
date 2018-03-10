@@ -4,13 +4,18 @@ class ArbitrageOpportunity
       statistic = arbitrage.kucoin_prices.each_with_object({}) do |(pair, price), result|
         result[pair] =
           {
-            kucoin: price,
-            binance: arbitrage.binance_prices[pair],
-            diffrence: ((price / arbitrage.binance_prices[pair]) * 100.0 - 100.0).abs
+            kucoin_buy: price[:buy],
+            kucoin_sell: price[:sell],
+            binance_buy: arbitrage.binance_prices[pair][:buy],
+            binance_sell: arbitrage.binance_prices[pair][:sell],
+            kucoin_first: ((arbitrage.binance_prices[pair][:buy] / price[:sell]) * 100.0 - 100.0).round(2),
+            binance_first: ((price[:buy] / arbitrage.binance_prices[pair][:sell]) * 100.0 - 100.0).round(2),
           }
       end
 
-      arbitrage.result = statistic.sort_by { |diff| diff[1][:diffrence] }.reverse.to_h
+      arbitrage.result = statistic.sort_by do |diff|
+        -[diff[1][:kucoin_first], diff[1][:binance_first]].max
+      end.to_h
     end
   end
 

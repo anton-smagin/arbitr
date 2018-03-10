@@ -3,7 +3,7 @@ class Kucoin
   HOST = 'https://api.kucoin.com'.freeze
 
   def buy(symbol, amount)
-    make_order(kucoin_symbol_representation(symbol), 'buy', amount)
+    make_order(kucoin_symbol_representation(symbol), 'BUY', amount)
   end
 
   def sell(symbol, amount)
@@ -22,8 +22,8 @@ class Kucoin
   end
 
   def prices
-    get('/v1/open/tick').parsed_response['data'].map do |symbol|
-      [symbol['symbol'].delete('-'), symbol['lastDealPrice']]
+    get('/v1/open/tick').parsed_response['data'].map do |price|
+      [price['symbol'].delete('-'), { buy: price['buy'], sell: price['sell'] }]
     end.to_h
   end
 
@@ -37,11 +37,11 @@ class Kucoin
     get(endpoint, headers: headers(endpoint))['data']['balance']
   end
 
-  private
+#  private
 
   def make_order(symbol, type, amount)
     endpoint = '/v1/order'
-    price = type.upcase == 'BUY' ? price(symbol, 'SELL') : price(symbol, 'BUY')
+    price = type == 'BUY' ? price(symbol, 'SELL') : price(symbol, 'BUY')
     payload = { symbol: symbol, type: type,
                 amount: amount, price: price }
     post(endpoint, query: payload, headers: headers(endpoint, payload))

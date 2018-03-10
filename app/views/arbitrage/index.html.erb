@@ -1,19 +1,25 @@
-<table>
+<table id="arbitrage-table">
   <thead>
     <tr>
-    <th>Пара</th>
-    <th>Kucoin</th>
-    <th>Binance</th>
-    <th>Разница</th>
+    <th>Symbol</th>
+    <th>Kucoin buy</th>
+    <th>Kucoin sell</th>
+    <th>Binance buy</th>
+    <th>Binance sell</th>
+    <th>Kucoin first</th>
+    <th>Binance first</th>
   </tr>
   </thead>
   <tbody>
   <% @arbitrage.result.each do |pair, prices| %>
     <tr>
       <td><%= pair %></td>
-      <td><%= prices[:kucoin] %></td>
-      <td><%= prices[:binance] %></td>
-      <td><%= prices[:diffrence] %></td>
+      <td><%= prices[:kucoin_buy] %></td>
+      <td><%= prices[:kucoin_sell] %></td>
+      <td><%= prices[:binance_buy] %></td>
+      <td><%= prices[:binance_sell] %></td>
+      <td><%= prices[:kucoin_first] %></td>
+      <td><%= prices[:binance_first] %></td>
     </tr>
   <%end%>
   </tbody>
