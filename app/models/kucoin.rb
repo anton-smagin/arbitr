@@ -29,7 +29,7 @@ class Kucoin
 
   def price(symbol, direction)
     kucoin_symbol = kucoin_symbol_representation(symbol)
-    get("/v1/#{kucoin_symbol}/open/tick")['data'][direction]
+    get("/v1/#{kucoin_symbol}/open/tick")['data'][direction.downcase]
   end
 
   def balance(coin)
@@ -68,7 +68,8 @@ class Kucoin
   end
 
   def kucoin_symbol_representation(symbol)
-    (symbol[-4] == '-' ? symbol : symbol.insert(-4, '-')).upcase
+    symbol_dup = symbol.dup
+    (symbol_dup[-4] == '-' ? symbol_dup : symbol_dup.insert(-4, '-')).upcase
   end
 
   def get(endpoint, params = {})

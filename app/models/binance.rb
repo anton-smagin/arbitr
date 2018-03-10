@@ -23,7 +23,7 @@ class Binance
     HTTParty.get(
       "#{HOST}/api/v3/ticker/bookTicker",
       query: { symbol: binance_symbol_reprosintation(symbol) }
-    )[direction]
+    )[direction].to_f
   end
 
   def withdraw(coin, amount, address)
@@ -45,7 +45,7 @@ class Binance
   def balance(coin)
     account_info['balances'].find do |balance|
       balance['asset'] == coin.upcase
-    end['free']
+    end['free'].to_f
   end
 
   def account_info

@@ -24,7 +24,7 @@ class BlockchainInfo
       query: {
         password: password
       }
-    )
+    ).parsed_response['balance']
   end
 
   def login
