@@ -1,8 +1,7 @@
 task arbitrage_task: :environment do
   wallet = BlockchainInfo.new
-  # Kucoin
-  buyer = Kucoin.new
-  seller = Binance.new
+  seller = Kucoin.new
+  buyer = Binance.new
 
   symbol = 'CTRBTC'
   coin = 'CTR'
@@ -19,7 +18,7 @@ task arbitrage_task: :environment do
     sleep(5)
   end
 
-  buyer.withdraw(coin, buyer.balance(coin), seller.deposit_address(coin))
+  buyer.withdraw(coin, buyer.balance(coin), seller.deposit_address(coin), seller)
 
   while seller.balance(coin).zero?
     sleep(5)

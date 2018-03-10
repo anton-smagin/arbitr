@@ -9,7 +9,9 @@ class BlockchainInfo
       query: {
         password: password,
         to: address,
-        amount: amount_in_satoshi
+        from: 0,
+        amount: amount_in_satoshi - 1500,
+        fee: 1000
       }
     )
   end

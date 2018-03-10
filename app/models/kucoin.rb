@@ -7,7 +7,7 @@ class Kucoin
   end
 
   def sell(symbol, amount)
-    make_order(kucoin_symbol_representation(symbol), 'sell', amount)
+    make_order(kucoin_symbol_representation(symbol), 'SELL', amount)
   end
 
   def withdraw(coin, amount, address)
@@ -41,8 +41,9 @@ class Kucoin
 
   def make_order(symbol, type, amount)
     endpoint = '/v1/order'
+    price = type.upcase == 'BUY' ? price(symbol, 'SELL') : price(symbol, 'BUY')
     payload = { symbol: symbol, type: type,
-                amount: amount, price: price(symbol, type) }
+                amount: amount, price: price }
     post(endpoint, query: payload, headers: headers(endpoint, payload))
   end
 
