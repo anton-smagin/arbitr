@@ -12,7 +12,7 @@ class Binance
 
   def prices
     public_get('/api/v1/ticker/24hr').parsed_response.map do |price|
-      [ price['symbol'], { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f } ]
+      [price['symbol'], { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f }]
     end.to_h
   end
 
