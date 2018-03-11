@@ -11,8 +11,15 @@ class Binance
   end
 
   def prices
-    public_get('/api/v1/ticker/24hr').parsed_response.map do |price|
-      [price['symbol'], { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f }]
+    prices =
+      public_get('/api/v1/ticker/24hr')
+        .parsed_response
+        .select do |price|
+          price['symbol'].include?('BTC') && !price['symbol'].include?('USDT')
+        end
+    prices.map do |price|
+      [price['symbol'],
+       { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f }]
     end.to_h
   end
 

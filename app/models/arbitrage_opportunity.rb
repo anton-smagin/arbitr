@@ -21,8 +21,17 @@ class ArbitrageOpportunity
 
   attr_accessor :result
 
-  def yobit_prices
-    @yobit_prices ||= Yobit.new.prices
+  def symbols
+    @symbols ||= begin
+      symbols = Arbitrage::MARKETS.inject([]) do |res, market|
+        res + send("#{market}_prices").keys
+      end
+      symbols.group_by(&:itself).select { |_, v| v.size > 1 }.keys
+    end
+  end
+
+  def poloniex_prices
+    @poloniex_prices ||= Poloniex.new.prices
   end
 
   def binance_prices
@@ -30,11 +39,6 @@ class ArbitrageOpportunity
   end
 
   def kucoin_prices
-    @kucoun_prices ||= begin
-      pairs = binance_prices.keys
-      Kucoin.new.prices.select do |pair, _price|
-        pairs.include?(pair) && pair.include?('BTC') && !pair.include?('USDT')
-      end
-    end
+    @kucoun_prices ||= Kucoin.new.prices
   end
 end

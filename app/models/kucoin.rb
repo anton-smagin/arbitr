@@ -22,7 +22,13 @@ class Kucoin
   end
 
   def prices
-    get('/v1/open/tick').parsed_response['data'].map do |price|
+    prices =
+      get('/v1/open/tick')
+        .parsed_response['data']
+        .select do |price|
+          price['symbol'].include?('BTC') && !price['symbol'].include?('USDT')
+        end
+    prices.map do |price|
       [price['symbol'].delete('-'), { buy: price['buy'], sell: price['sell'] }]
     end.to_h
   end
