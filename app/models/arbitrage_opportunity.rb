@@ -1,7 +1,7 @@
 class ArbitrageOpportunity
   def self.call
     new.tap do |arb|
-      statistic = arb.symbols.each_with_object({}) do |symbol, result|
+      statistic = Arbitrage::SYMBOLS.each_with_object({}) do |symbol, result|
         Arbitrage::MARKETS.each do |market|
           result[symbol] ||= {}
           result[symbol]["#{market}_buy"] = arb.send("#{market}_prices")[symbol].try(:[], :buy)
@@ -31,24 +31,12 @@ class ArbitrageOpportunity
 
   attr_accessor :result
 
-  def symbols
-    @symbols ||= begin
-      symbols = Arbitrage::MARKETS.inject([]) do |res, market|
-        res + send("#{market}_prices").keys
-      end
-      symbols.group_by(&:itself).select { |_, v| v.size > 1 }.keys
+  Arbitrage::MARKETS.each do |market|
+    define_method("#{market}_prices".to_sym) do
+      var_name = "@#{market}_prices"
+      market_klass = market.capitalize.constantize
+      self.instance_variable_get(var_name) ||
+        self.instance_variable_set(var_name, market_klass.new.prices)
     end
-  end
-
-  def poloniex_prices
-    @poloniex_prices ||= Poloniex.new.prices
-  end
-
-  def binance_prices
-    @binance_prices ||= Binance.new.prices
-  end
-
-  def kucoin_prices
-    @kucoun_prices ||= Kucoin.new.prices
   end
 end

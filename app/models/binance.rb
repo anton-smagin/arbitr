@@ -23,6 +23,10 @@ class Binance
     end.to_h
   end
 
+  def symbols
+    prices.keys
+  end
+
   def price(symbol, direction)
     direction = direction.casecmp('buy').zero? ? 'bidPrice' : 'askPrice'
     public_get('/api/v3/ticker/bookTicker', symbol:

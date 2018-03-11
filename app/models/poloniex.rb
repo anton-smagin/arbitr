@@ -9,4 +9,8 @@ class Poloniex
               { buy: price['highestBid'].to_f, sell: price['lowestAsk'].to_f }]
             end.to_h
   end
+
+  def symbols
+    prices.keys
+  end
 end

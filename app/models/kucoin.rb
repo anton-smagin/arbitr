@@ -33,6 +33,10 @@ class Kucoin
     end.to_h
   end
 
+  def symbols
+    prices.keys
+  end
+
   def price(symbol, direction)
     kucoin_symbol = kucoin_symbol_representation(symbol)
     get("/v1/#{kucoin_symbol}/open/tick")['data'][direction.downcase]
