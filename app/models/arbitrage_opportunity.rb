@@ -31,12 +31,27 @@ class ArbitrageOpportunity
 
   attr_accessor :result
 
-  Arbitrage::MARKETS.each do |market|
-    define_method("#{market}_prices".to_sym) do
-      var_name = "@#{market}_prices"
-      market_klass = market.capitalize.constantize
-      self.instance_variable_get(var_name) ||
-        self.instance_variable_set(var_name, market_klass.new.prices)
-    end
+  def kucoin_prices
+    Kucoin.new.prices
   end
+
+  def binance_prices
+    Binance.new.prices
+  end
+
+  def poloniex_prices
+    Poloniex.new.prices
+  end
+
+  def yobit_prices
+    Yobit.new.prices
+  end
+  # Arbitrage::MARKETS.each do |market|
+  #   define_method("#{market}_prices".to_sym) do
+  #     var_name = "@#{market}_prices"
+  #     market_klass = market.capitalize.constantize
+  #     self.instance_variable_get(var_name) ||
+  #       self.instance_variable_set(var_name, market_klass.new.prices)
+  #   end
+  # end
 end
