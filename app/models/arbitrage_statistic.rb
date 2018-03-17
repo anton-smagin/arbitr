@@ -16,8 +16,9 @@ class ArbitrageStatistic < ApplicationRecord
     deals.each do |symbol, deals|
       deals.each do |market, percent|
         market1, market2 = market.split('_')
-        create(symbol: symbol, first_market: market1, second_market:
+        a_s = create(symbol: symbol, first_market: market1, second_market:
           market2, percent: percent)
+        ArbitrageStatisticMailer.opportunity(a_s).deliver_now
       end
     end
   end

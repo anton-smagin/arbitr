@@ -16,6 +16,10 @@ RSpec.describe ArbitrageStatistic do
 
       stub_const('Arbitrage::MARKETS', %w[poloniex binance yobit])
 
+      expect(ArbitrageStatisticMailer).to receive(:opportunity).twice do
+        double(deliver_now: nil)
+      end
+
       ArbitrageStatistic.collect
       result = ArbitrageStatistic.all.to_a
       expect(result.count).to eq 2
