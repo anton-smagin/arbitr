@@ -7,7 +7,7 @@ set :output, { error: 'error.log', standard: 'cron.log' }
 #
 # set :output, "/path/to/my/cron_log.log"
 #
-every 10.minutes do
+every 1.minute do
   runner "ArbitrageStatistic.collect"
 end
 #

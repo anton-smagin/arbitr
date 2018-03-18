@@ -13,13 +13,14 @@ class ArbitrageStatistic < ApplicationRecord
       [symbol, opportunites] unless opportunites.empty?
     end.compact.to_h
 
-    deals.each do |symbol, deals|
-      deals.each do |market, percent|
+    statistics = deals.map do |symbol, diffrence|
+      diffrence.map do |market, percent|
         market1, market2 = market.split('_')
-        a_s = create(symbol: symbol, first_market: market1, second_market:
+        create(symbol: symbol, first_market: market1, second_market:
           market2, percent: percent)
-        ArbitrageStatisticMailer.opportunity(a_s).deliver_now
       end
-    end
+    end.flatten
+
+    ArbitrageStatisticMailer.opportunity(statistics).deliver_now
   end
 end

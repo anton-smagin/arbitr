@@ -1,7 +1,7 @@
 class ArbitrageStatisticMailer < ApplicationMailer
-  def opportunity(arbitrage_statistic)
-    @arbitrage_statistic = arbitrage_statistic
+  def opportunity(arbitrage_statistics)
+    @arbitrage_statistics = arbitrage_statistics
     mail(to: 'swagmir2@gmail.com', subject:
-      "Возможность Арбитража #{arbitrage_statistic.id}")
+      'Возможность Арбитража')
   end
 end

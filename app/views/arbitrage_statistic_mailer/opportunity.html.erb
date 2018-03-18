@@ -1,4 +1,20 @@
-<p>Покупай на <b><%= @arbitrage_statistic.first_market %></b></p>
-<p>Продавай на <b><%= @arbitrage_statistic.second_market %></b></p>
-</br>
-<p>Разница <b><%= @arbitrage_statistic.percent %></b></p>
+<table>
+  <thead>
+    <tr>
+      <td>Покупай на:</td>
+      <td>Продавай на:</td>
+      <td>Символ:</td>
+      <td>Разница</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @arbitrage_statistics.each do |statistic| %>
+      <tr>
+        <td><b><%= statistic.first_market %></b></td>
+        <td><b><%= statistic.second_market %></b></td>
+        <td><b><%= statistic.symbol %></b></td>
+        <td><b><%= statistic.percent %> %</b></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
