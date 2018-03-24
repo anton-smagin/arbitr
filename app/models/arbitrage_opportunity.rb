@@ -8,7 +8,7 @@ class ArbitrageOpportunity
           result[symbol]["#{market}_sell"] = arb.send("#{market}_prices")[symbol].try(:[], :sell)
         end
 
-        Arbitrage::MARKETS.each_with_index do |market1|
+        Arbitrage::MARKETS.each do |market1|
           (Arbitrage::MARKETS - [market1]).each do |market2|
             if result[symbol]["#{market1}_buy"].nil? || result[symbol]["#{market2}_buy"].nil?
               result[symbol]["#{market1}_#{market2}"] = nil

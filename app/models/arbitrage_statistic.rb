@@ -20,7 +20,7 @@ class ArbitrageStatistic < ApplicationRecord
           market2, percent: percent)
       end
     end.flatten
-
+    return if statistics.blank?
     ArbitrageStatisticMailer.opportunity(statistics).deliver_now
   end
 end
