@@ -20,7 +20,16 @@ class ArbitrageStatistic < ApplicationRecord
           market2, percent: percent)
       end
     end.flatten
-    return if statistics.blank?
+
+    notify_statistics = statistics.reject do |s|
+      ArbitrageStatistic.where(notified: true, symbol: s.symbol, first_market:
+        s.first_market, second_market: s.second_market)
+                        .where('created_at > ?', 1.day.ago).count > 0
+    end
+
+    return if notify_statistics.blank?
+    ArbitrageStatistic.where(id: notify_statistics.pluck(:id))
+                      .update_all(notified: true)
     ArbitrageStatisticMailer.opportunity(statistics).deliver_now
   end
 end
