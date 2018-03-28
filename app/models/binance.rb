@@ -65,7 +65,7 @@ class Binance
   end
 
   def public_get(endpoint, payload = {})
-    HTTParty.get( "#{HOST}#{endpoint}", query: payload)
+    HTTParty.get("#{HOST}#{endpoint}", query: payload)
   end
 
   def get(endpoint, payload = {})
@@ -116,5 +116,19 @@ class Binance
     ENV['BINANCE_API_SECRET']
   end
 
-  #send('public_get', '/api/v1/exchangeInfo').parsed_response['symbols'].find{|s| s['symbol'] == 'CTRBTC'}
+  def exchange_info
+    @exhange_info ||= public_get('/api/v1/exchangeInfo').parsed_response
+  end
+
+  def price_to_precision(price, symbol)
+    symbol_info = exchange_info['symbols'].find { |s| s['symbol'] == symbol }
+    step_size = symbol_info['filters'][1]['stepSize']
+    price.round(Math.log10(1 / step_size.to_f))
+  end
+
+  def minimum_lot(symbol)
+    exchange_info['symbols'].find { |s| s['symbol'] == symbol }['filters'][2]['minNotional']
+    nil
+    # to bitcoin
+  end
 end
