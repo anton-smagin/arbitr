@@ -1,0 +1,3 @@
+class SpreadTrade
+
+end

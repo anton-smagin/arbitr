@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180324201631) do
+ActiveRecord::Schema.define(version: 20180328155540) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -52,6 +52,12 @@ ActiveRecord::Schema.define(version: 20180324201631) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["arbitrage_id"], name: "index_sells_on_arbitrage_id"
+  end
+
+  create_table "spread_trades", force: :cascade do |t|
+    t.string "status"
+    t.float "buy_price"
+    t.float "sell_price"
   end
 
   create_table "transactions", force: :cascade do |t|

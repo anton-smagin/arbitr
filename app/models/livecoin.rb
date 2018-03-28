@@ -41,6 +41,14 @@ class Livecoin
     post '/exchange/cancellimit', currencyPair: symbol, orderId: order_id
   end
 
+  def active_orders(symbol)
+    get('/exchange/client_orders')
+  end
+
+  def orders(payload = {})
+    get('/exchange/client_orders', payload)
+  end
+
   def symbols
     @symbols ||= coins_info.select { |coin| coin['walletStatus'] == 'normal' }
                            .map { |coin| coin['symbol'] << 'BTC' } - ['BTCBTC']
@@ -120,6 +128,10 @@ class Livecoin
       api_secret,
       payload.sort.to_h.to_query
     ).upcase
+  end
+
+  def commission
+    0.17
   end
 
   def api_key
