@@ -42,6 +42,7 @@ group :development, :test do
   gem 'database_cleaner'
   gem 'factory_bot_rails'
   gem 'webmock'
+  gem 'shoulda-matchers', '~> 3.1'
 
   # Adds support for Capybara system testing and selenium driver
   gem 'capybara', '~> 2.13'

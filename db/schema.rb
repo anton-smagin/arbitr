@@ -55,9 +55,15 @@ ActiveRecord::Schema.define(version: 20180328155540) do
   end
 
   create_table "spread_trades", force: :cascade do |t|
+    t.string "exchange"
+    t.string "symbol"
     t.string "status"
+    t.bigint "buy_order_id"
     t.float "buy_price"
+    t.float "buy_amount"
+    t.bigint "sell_order_id"
     t.float "sell_price"
+    t.float "sell_amount"
   end
 
   create_table "transactions", force: :cascade do |t|

@@ -17,6 +17,10 @@ class Livecoin
     end
   end
 
+  def price(symbol, direction)
+    prices[symbol][direction.to_sym]
+  end
+
   def make_order(symbol:, amount:, direction:, type:, price: nil)
     symbol = livecoin_symbol_reprosintation(symbol)
     if type == 'limit'
@@ -130,8 +134,20 @@ class Livecoin
     ).upcase
   end
 
+  def withdraw
+    #not implimented yet
+  end
+
+  def deposit_address
+    #not implimented yet
+  end
+
+  def title
+    'livecoin'
+  end
+
   def commission
-    0.17
+    0.0017
   end
 
   def api_key

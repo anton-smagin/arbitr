@@ -2,53 +2,63 @@
 class SpreadBot
   CORRIDOR = 0.025
 
-  def self.run(exchange, symbol)
-    bot = new(exchange, symbol)
-    return unless spread_diffrence < exchange.commission * 2
-    return bot.retrade if bot.should_retrade?
-    bot.trade
-  end
+  attr_reader :exchange, :symbol, :amount
 
-  attr_reader :exchange, :symbol
-
-  def initialize(exchange, symbol)
+  def initialize(exchange, symbol, amount)
     @exchange = exchange
     @symbol = symbol
+    @amount = amount
   end
 
-  def retrade
+  def run
+    return if spread_difference < exchange.commission * 2
+    return retrade! if should_retrade?
+    trade!
+  end
+
+  def retrade!
     active_trade.update(status: 'failed')
-    trade
+    @active_trade = nil
+    trade!
   end
 
-  def trade
+  def trade!
     if !active_trade
-      SpreadTrade.create(
-        status: 'buying',
-        buy_price: price[:buy],
-        sell_price: price[:sell]
-      ) if buy!(price[:buy])
+      buy_order_id = buy!
+      if buy_order_id
+        SpreadTrade.create(
+          exchange: exchange.title,
+          status: 'buying',
+          buy_price: price[:buy],
+          buy_order_id: buy_order_id,
+          sell_price: price[:sell],
+          buy_amount: amount
+        )
+      end
     elsif active_trade.status == 'buying' && !buy_order
-      active_trade.update(status: 'selling') if sell!(active_trade.sell_price)
+      sell_order_id = sell!
+      if sell_order_id
+        active_trade.update(status: 'selling', sell_order_id: sell_order_id)
+      end
     elsif active_trade.status == 'selling' && !sell_order
       active_trade.update(status: 'finished')
     end
   end
 
   def price
-    @price ||= exchange.price[symbol]
+    @price ||= exchange.prices[symbol]
   end
 
   def should_retrade?
-    return false unless %w[selling buying].include? active_trade.&status
+    return false unless %w[selling buying].include? active_trade&.status
     price_not_in_corridor?
   end
 
   def price_not_in_corridor?
     trading_price = if active_trade.status == 'selling'
-                      sell_order[:price]
+                      active_trade[:sell_price]
                     elsif active_trade.status == 'buying'
-                      buy_order[:price]
+                      active_trade[:buy_price]
                     end
     !trading_price.between?(*corridor)
   end
@@ -58,7 +68,7 @@ class SpreadBot
   end
 
   def symbol_price
-    exchage.prices[symbol]
+    exchange.prices[symbol]
   end
 
   def spread_difference
@@ -66,7 +76,12 @@ class SpreadBot
   end
 
   def active_trade
-    @active_trade ||= SpreadTrade.find(status: %w[buying selling])
+    @active_trade ||=
+      SpreadTrade.find_by(
+        status: %w[buying selling],
+        exchange: exchange.title,
+        symbol: symbol
+      )
   end
 
   def sell!
