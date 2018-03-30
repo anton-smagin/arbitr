@@ -22,7 +22,6 @@ class Livecoin
   end
 
   def make_order(symbol:, amount:, direction:, type:, price: nil)
-    symbol = livecoin_symbol_reprosintation(symbol)
     if type == 'limit'
       limit_order(symbol, amount, direction, price)
     elsif type == 'market'
@@ -31,13 +30,15 @@ class Livecoin
   end
 
   def limit_order(symbol, amount, direction, price)
-    post "/exchange/#{direction}limit", currencyPair: symbol, price:
-      price.to_d, quantity: amount.to_d
+    order = post "/exchange/#{direction}limit", currencyPair: livecoin_symbol_reprosintation(symbol),
+    price: price_to_precision(price, symbol).to_d, quantity: amount.to_d
+    order['success'] ? order['orderId'] : false
   end
 
   def market_order(symbol, amount, direction)
-    post "/exchange/#{direction}market", currencyPair: symbol, quantity:
+    order = post "/exchange/#{direction}market", currencyPair: livecoin_symbol_reprosintation(symbol), quantity:
       amount.to_d
+    order['success'] ? order['orderId'] : false
   end
 
   def cancel_order(symbol, order_id)
@@ -47,6 +48,10 @@ class Livecoin
 
   def active_orders(symbol)
     get('/exchange/client_orders')
+  end
+
+  def order(order_id)
+    get('/exchange/order', orderId: order_id)
   end
 
   def orders(payload = {})
@@ -94,7 +99,7 @@ class Livecoin
 
   def livecoin_symbol_reprosintation(symbol)
     clone_symbol = symbol
-    clone_symbol.gsub(/_|-/, '').insert('/', -4)
+    clone_symbol.gsub(/_|-/, '').insert(-4, '/')
   end
 
   def headers(payload)
@@ -108,18 +113,14 @@ class Livecoin
       query: payload,
       headers: headers(payload)
     )
-    return response if response['success']
-    raise ApiError, response
   end
 
   def post(endpoint, payload = {})
-    response = HTTParty.post(
+    HTTParty.post(
       "#{HOST}#{endpoint}",
-      query: payload,
+      body: payload,
       headers: headers(payload)
     )
-    return response if response['success']
-    raise ApiError, response
   end
 
   def public_get(endpoint, payload = {})
@@ -143,11 +144,11 @@ class Livecoin
   end
 
   def title
-    'livecoin'
+    'Livecoin'
   end
 
   def commission
-    0.0017
+    0.0018
   end
 
   def api_key

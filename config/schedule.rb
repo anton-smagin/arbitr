@@ -10,6 +10,10 @@ set :output, { error: 'error.log', standard: 'cron.log' }
 every 3.minutes do
   runner "ArbitrageStatistic.collect"
 end
+
+every 1.minute do
+  runner "BotRunner.call"
+end
 #
 # every 4.days do
 #   runner "AnotherModel.prune_old_records"
