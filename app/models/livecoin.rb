@@ -30,28 +30,35 @@ class Livecoin
   end
 
   def limit_order(symbol, amount, direction, price)
-    order = post "/exchange/#{direction}limit", currencyPair: livecoin_symbol_reprosintation(symbol),
-    price: price_to_precision(price, symbol).to_d, quantity: amount.to_d
+    order = post "/exchange/#{direction}limit",
+                 currencyPair: livecoin_symbol_representation(symbol),
+                 price: price_to_precision(price, symbol).to_d,
+                 quantity: amount.to_d
     order['success'] ? order['orderId'] : false
   end
 
   def market_order(symbol, amount, direction)
-    order = post "/exchange/#{direction}market", currencyPair: livecoin_symbol_reprosintation(symbol), quantity:
-      amount.to_d
+    order = post "/exchange/#{direction}market",
+                 currencyPair: livecoin_symbol_representation(symbol),
+                 quantity: amount.to_d
     order['success'] ? order['orderId'] : false
   end
 
   def cancel_order(symbol, order_id)
-    symbol = livecoin_symbol_reprosintation(symbol)
+    symbol = livecoin_symbol_representation(symbol)
     post '/exchange/cancellimit', currencyPair: symbol, orderId: order_id
   end
 
-  def active_orders(symbol)
+  def active_orders
     get('/exchange/client_orders')
   end
 
-  def order(order_id)
+  def order(order_id, symbol = nil)
     get('/exchange/order', orderId: order_id)
+  end
+
+  def order_status(order_id, symbol = nil)
+    statuses[order(order_id, symbol)['status']]
   end
 
   def orders(payload = {})
@@ -97,7 +104,7 @@ class Livecoin
     price.round(restrictions(symbol)[:price_scale])
   end
 
-  def livecoin_symbol_reprosintation(symbol)
+  def livecoin_symbol_representation(symbol)
     clone_symbol = symbol
     clone_symbol.gsub(/_|-/, '').insert(-4, '/')
   end
@@ -108,7 +115,7 @@ class Livecoin
   end
 
   def get(endpoint, payload = {})
-    response = HTTParty.get(
+    HTTParty.get(
       "#{HOST}#{endpoint}",
       query: payload,
       headers: headers(payload)
@@ -124,7 +131,7 @@ class Livecoin
   end
 
   def public_get(endpoint, payload = {})
-    response = HTTParty.get("#{HOST}#{endpoint}", query: payload)
+    HTTParty.get("#{HOST}#{endpoint}", query: payload)
   end
 
   def signature(payload)
@@ -136,11 +143,11 @@ class Livecoin
   end
 
   def withdraw
-    #not implimented yet
+    # not implimented yet
   end
 
   def deposit_address
-    #not implimented yet
+    # not implimented yet
   end
 
   def title
@@ -157,5 +164,15 @@ class Livecoin
 
   def api_secret
     ENV['LIVECOIN_API_SECRET']
+  end
+
+  def statuses
+    {
+      'EXECUTED' => :filled,
+      'OPEN' => :open,
+      'CANCELLED' => :canceled,
+      'PARTIALLY_FILLED' => :partially_filled,
+      'PARTIALLY_FILLED_AND_CANCELLED' => :canceled
+    }
   end
 end

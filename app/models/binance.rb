@@ -2,25 +2,24 @@
 class Binance
   HOST = 'https://api.binance.com'.freeze
 
-  def buy(symbol, amount)
-    make_order(binance_symbol_reprosintation(symbol), 'BUY', amount)
+  def buy(symbol:, amount:, price: nil, type:)
+    make_order symbol: symbol, direction: 'BUY', amount: amount, price:
+      price, type: type
   end
 
-  def sell(symbol, amount)
-    make_order(binance_symbol_reprosintation(symbol), 'SELL', amount)
+  def sell(symbol:, amount:, price: nil, type:)
+    make_order symbol: symbol, direction: 'SELL', amount: amount, price:
+      price, type: type
   end
 
   def prices
-    prices =
-      public_get('/api/v1/ticker/24hr')
-        .parsed_response
-        .select do |price|
-          price['symbol'].include?('BTC') && !price['symbol'].include?('USDT')
-        end
-    prices.map do |price|
-      [price['symbol'],
-       { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f }]
-    end.to_h
+    public_get('/api/v1/ticker/24hr')
+      .parsed_response
+      .select { |pair| pair['symbol'][-3..-1] == 'BTC' }
+      .map do |price|
+        [price['symbol'],
+         { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f }]
+      end.to_h
   end
 
   def symbols
@@ -30,7 +29,7 @@ class Binance
   def price(symbol, direction)
     direction = direction.casecmp('buy').zero? ? 'bidPrice' : 'askPrice'
     public_get('/api/v3/ticker/bookTicker', symbol:
-      binance_symbol_reprosintation(symbol))[direction].to_f
+      binance_symbol_representation(symbol))[direction].to_f
   end
 
   def withdraw(coin, amount, address, name)
@@ -52,16 +51,40 @@ class Binance
     get('/api/v3/account')
   end
 
-  #private
-
-  def make_order(symbol, type, amount)
-    post(
+  def make_order(symbol:, amount:, direction:, type:, price: nil)
+    response = post(
       '/api/v3/order',
-      symbol: symbol,
-      side: type,
-      type: 'MARKET',
-      quantity: amount
+      symbol: binance_symbol_representation(symbol),
+      side: direction.upcase,
+      type: type.upcase,
+      quantity: amount,
+      price: price_to_precision(price, symbol).to_d,
+      timeInForce: 'GTC'
     )
+    response['orderId'] || false
+  end
+
+  def cancel_order(symbol, order_id)
+    delete '/api/v3/order', symbol:
+      binance_symbol_representation(symbol), orderId: order_id
+  end
+
+  def active_orders
+    get('/api/v3/openOrders')
+  end
+
+  def order(order_id, symbol)
+    get('/api/v3/allOrders',
+        symbol: binance_symbol_representation(symbol),
+        orderId: order_id)[0]
+  end
+
+  def order_status(order_id, symbol = nil)
+    statuses[order(order_id, symbol)['status']]
+  end
+
+  def orders(symbol)
+    get('/api/v3/allOrders', symbol: binance_symbol_representation(symbol))
   end
 
   def public_get(endpoint, payload = {})
@@ -78,6 +101,14 @@ class Binance
 
   def post(endpoint, payload = {})
     HTTParty.post(
+      "#{HOST}#{endpoint}",
+      headers: headers,
+      query: signed_params(payload)
+    )
+  end
+
+  def delete(endpoint, payload = {})
+    HTTParty.delete(
       "#{HOST}#{endpoint}",
       headers: headers,
       query: signed_params(payload)
@@ -104,8 +135,8 @@ class Binance
     )
   end
 
-  def binance_symbol_reprosintation(symbol)
-    symbol.delete('_').delete('-').upcase
+  def binance_symbol_representation(symbol)
+    symbol.gsub(%r{_|-|\/}, '')
   end
 
   def api_key
@@ -122,13 +153,31 @@ class Binance
 
   def price_to_precision(price, symbol)
     symbol_info = exchange_info['symbols'].find { |s| s['symbol'] == symbol }
-    step_size = symbol_info['filters'][1]['stepSize']
-    price.round(Math.log10(1 / step_size.to_f))
+    price.round(symbol_info['quotePrecision'])
   end
 
   def minimum_lot(symbol)
-    exchange_info['symbols'].find { |s| s['symbol'] == symbol }['filters'][2]['minNotional']
-    nil
-    # to bitcoin
+    exchange_info['symbols']
+      .find { |s| s['symbol'] == symbol }['filters'][2]['minNotional']
+  end
+
+  def commission
+    0.001
+  end
+
+  def title
+    'Binance'
+  end
+
+  def statuses
+    {
+      'FILLED' => :filled,
+      'NEW' => :open,
+      'CANCELED' => :canceled,
+      'REJECTED' => :rejected,
+      'EXPIRED' => :expired,
+      'PENDING_CANCEL' => :pending_cancelled,
+      'PARTIALLY_FILLED' => :partially_executed
+    }
   end
 end

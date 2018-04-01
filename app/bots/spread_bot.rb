@@ -20,9 +20,9 @@ class SpreadBot
   def retrade!
     active_trade.update(status: 'failed')
     if active_trade.status == 'buying'
-      cancel_order(active_trade.buy_order_id)
+      exchange.cancel_order(symbol, active_trade.buy_order_id)
     elsif active_trade.status == 'selling'
-      cancel_order(active_trade.sell_order_id)
+      exchange.cancel_order(symbol, active_trade.sell_order_id)
     end
     @active_trade = nil
     trade!
@@ -57,7 +57,7 @@ class SpreadBot
   end
 
   def should_retrade?
-    return false unless %w[selling buying].include? active_trade&.status
+    return false unless %w[selling buying].include?(active_trade&.status)
     price_not_in_corridor?
   end
 
@@ -112,10 +112,10 @@ class SpreadBot
   end
 
   def buy_order
-    exchange.order(active_trade.buy_order_id)['status'] != 'EXECUTED'
+    exchange.order_status(active_trade.buy_order_id, symbol) != :filled
   end
 
   def sell_order
-    exchange.order(active_trade.sell_order_id)['status'] != 'EXECUTED'
+    exchange.order_status(active_trade.sell_order_id, symbol) != :filled
   end
 end
