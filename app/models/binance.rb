@@ -52,15 +52,17 @@ class Binance
   end
 
   def make_order(symbol:, amount:, direction:, type:, price: nil)
-    response = post(
-      '/api/v3/order',
+    payload = {
       symbol: binance_symbol_representation(symbol),
       side: direction.upcase,
       type: type.upcase,
-      quantity: amount,
-      price: price_to_precision(price, symbol).to_d,
-      timeInForce: 'GTC'
-    )
+      quantity: amount
+    }
+    if price
+      payload[:price] = price_to_precision(price, symbol).to_d
+      payload[:timeInForce] = 'GTC'
+    end
+    response = post('/api/v3/order', payload)
     response['orderId'] || false
   end
 

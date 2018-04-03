@@ -125,7 +125,8 @@ RSpec.describe SpreadBot do
         title: 'Livecoin',
         prices:  exchange_prices(0.2, 0.21),
         active_trade: active_trade,
-        commission: 0.017
+        commission: 0.017,
+        cancel_order: true
       )
     end
 
@@ -142,8 +143,9 @@ RSpec.describe SpreadBot do
 
     it 'retrade' do
       expect(bot).to receive(:buy!) { 100 }
+      expect(bot).to receive(:sell_market!) { 101 }
       bot.run
-      expect(SpreadTrade.where(status: 'failed').count).to eq 1
+      expect(SpreadTrade.where(status: 'sell_failed').count).to eq 1
       expect(SpreadTrade.where(status: 'buying').count).to eq 1
     end
   end

@@ -11,18 +11,19 @@ class SpreadBot
   end
 
   def run
-    return if SpreadTrade.where(status: %w[finished failed], exchange: exchange.title, symbol: symbol).count > 10
     return if spread_difference < exchange.commission * 2
     return retrade! if should_retrade?
     trade!
   end
 
   def retrade!
-    active_trade.update(status: 'failed')
     if active_trade.status == 'buying'
+      active_trade.update(status: 'buy_failed')
       exchange.cancel_order(symbol, active_trade.buy_order_id)
     elsif active_trade.status == 'selling'
+      active_trade.update(status: 'sell_failed')
       exchange.cancel_order(symbol, active_trade.sell_order_id)
+      sell_market!
     end
     @active_trade = nil
     trade!
@@ -107,6 +108,15 @@ class SpreadBot
       price: price[:buy],
       direction: 'buy',
       type: 'limit',
+      amount: amount
+    )
+  end
+
+  def sell_market!
+    exchange.make_order(
+      symbol: symbol,
+      direction: 'sell',
+      type: 'market',
       amount: amount
     )
   end
