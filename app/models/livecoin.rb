@@ -1,5 +1,5 @@
 # working with livecoin market
-class Livecoin
+class Livecoin < Exchange
   HOST = 'https://api.livecoin.net'.freeze
   MINIMUM_ORDER = 0.0001
 
@@ -83,6 +83,13 @@ class Livecoin
     get('/payment/balances', currency: coin)
   end
 
+  def balances
+    get('/payment/balances')
+      .select { |b| b['type'] == 'total' && b['value'] > 0 }
+      .map { |b| [b['currency'], b['value']] }
+      .to_h
+  end
+
   def min_order(coin)
     restrictions(coin)[:minimum]
   end
@@ -112,26 +119,6 @@ class Livecoin
   def headers(payload)
     { 'Api-Key' => api_key,
       'Sign' => signature(payload) }
-  end
-
-  def get(endpoint, payload = {})
-    HTTParty.get(
-      "#{HOST}#{endpoint}",
-      query: payload,
-      headers: headers(payload)
-    )
-  end
-
-  def post(endpoint, payload = {})
-    HTTParty.post(
-      "#{HOST}#{endpoint}",
-      body: payload,
-      headers: headers(payload)
-    )
-  end
-
-  def public_get(endpoint, payload = {})
-    HTTParty.get("#{HOST}#{endpoint}", query: payload)
   end
 
   def signature(payload)

@@ -18,11 +18,11 @@ class SpreadBot
 
   def retrade!
     if active_trade.status == 'buying'
-      active_trade.update(status: 'buy_failed')
       exchange.cancel_order(symbol, active_trade.buy_order_id)
+      active_trade.update(status: 'buy_failed')
     elsif active_trade.status == 'selling'
-      active_trade.update(status: 'sell_failed')
       exchange.cancel_order(symbol, active_trade.sell_order_id)
+      active_trade.update(status: 'sell_failed')
       sell_market!
     end
     @active_trade = nil
@@ -122,10 +122,14 @@ class SpreadBot
   end
 
   def buy_order
-    exchange.order_status(active_trade.buy_order_id, symbol) != :filled
+    %i[open partially_filled].include?(
+        exchange.order_status(active_trade.buy_order_id, symbol)
+      )
   end
 
   def sell_order
-    exchange.order_status(active_trade.sell_order_id, symbol) != :filled
+    %i[open partially_filled].include?(
+      exchange.order_status(active_trade.sell_order_id, symbol)
+    )
   end
 end

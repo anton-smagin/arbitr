@@ -1,5 +1,5 @@
 # working with binance market
-class Binance
+class Binance < Exchange
   HOST = 'https://api.binance.com'.freeze
 
   def buy(symbol:, amount:, price: nil, type:)
@@ -47,6 +47,13 @@ class Binance
     end['free'].to_f
   end
 
+  def balances
+    account_info['balances']
+      .select { |bal| bal['free'].to_f > 0 || bal['locked'].to_f > 0 }
+      .map { |bal| [bal['asset'], bal['free'].to_f + bal['locked'].to_f] }
+      .to_h
+  end
+
   def account_info
     get('/api/v3/account')
   end
@@ -89,34 +96,6 @@ class Binance
     get('/api/v3/allOrders', symbol: binance_symbol_representation(symbol))
   end
 
-  def public_get(endpoint, payload = {})
-    HTTParty.get("#{HOST}#{endpoint}", query: payload)
-  end
-
-  def get(endpoint, payload = {})
-    HTTParty.get(
-      "#{HOST}#{endpoint}",
-      headers: headers,
-      query: signed_params(payload)
-    )
-  end
-
-  def post(endpoint, payload = {})
-    HTTParty.post(
-      "#{HOST}#{endpoint}",
-      headers: headers,
-      query: signed_params(payload)
-    )
-  end
-
-  def delete(endpoint, payload = {})
-    HTTParty.delete(
-      "#{HOST}#{endpoint}",
-      headers: headers,
-      query: signed_params(payload)
-    )
-  end
-
   def signed_params(payload = {})
     timestamped_params = { timestamp: timestamp, **payload }.sort.to_h
     query_string = URI.encode_www_form(timestamped_params)
@@ -127,7 +106,7 @@ class Binance
     (Time.now.to_i * 1000).to_s
   end
 
-  def headers
+  def headers(_payload = {})
     { 'X-MBX-APIKEY' => api_key }
   end
 
@@ -179,7 +158,7 @@ class Binance
       'REJECTED' => :rejected,
       'EXPIRED' => :expired,
       'PENDING_CANCEL' => :pending_cancelled,
-      'PARTIALLY_FILLED' => :partially_executed
+      'PARTIALLY_FILLED' => :partially_filled
     }
   end
 end

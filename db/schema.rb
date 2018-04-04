@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180401173404) do
+ActiveRecord::Schema.define(version: 20180404074157) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -36,6 +36,13 @@ ActiveRecord::Schema.define(version: 20180401173404) do
     t.datetime "updated_at", null: false
   end
 
+  create_table "bot_balances", force: :cascade do |t|
+    t.float "livecoin"
+    t.float "binance"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "buys", force: :cascade do |t|
     t.string "price"
     t.string "symbol"
@@ -43,6 +50,14 @@ ActiveRecord::Schema.define(version: 20180401173404) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["arbitrage_id"], name: "index_buys_on_arbitrage_id"
+  end
+
+  create_table "profits", force: :cascade do |t|
+    t.float "amount"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_profits_on_user_id"
   end
 
   create_table "sells", force: :cascade do |t|
@@ -79,4 +94,23 @@ ActiveRecord::Schema.define(version: 20180401173404) do
     t.index ["arbitrage_id"], name: "index_transactions_on_arbitrage_id"
   end
 
+  create_table "transfers", force: :cascade do |t|
+    t.string "type"
+    t.float "amount"
+    t.bigint "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_transfers_on_user_id"
+  end
+
+  create_table "users", force: :cascade do |t|
+    t.string "name"
+    t.string "password"
+    t.string "password_confirmation"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  add_foreign_key "profits", "users"
+  add_foreign_key "transfers", "users"
 end
