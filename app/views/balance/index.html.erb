@@ -1,0 +1,28 @@
+<div class="container">
+  <div class="row">
+    <h2>Balance chart</h2>
+  </div>
+  <div class="row">
+    <form class="form-inline" action="/balance" method="get">
+      <div class="form-group mb-2">
+        <label for="days">For last days:</label>
+        <input class="form-control" type="text" name="days" value="<%= days %>">
+      </div>
+      <button type="submit" class="btn-sm btn-primary"> Get </button>
+    </form>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <%= line_chart @chart %>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="col-xs-3">binance wins: <%= @binance_wins %></div>
+      <div class="col-xs-3">binance loses: <%= @binance_loses %></div>
+      <div class="col-xs-3">livecoin wins: <%= @livecoin_wins %></div>
+      <div class="col-xs-3">livecoin loses: <%= @livecoin_loses %></div>
+    </div>
+  </div>
+</div>
+

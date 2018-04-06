@@ -16,4 +16,8 @@ class BotBalance < ApplicationRecord
           (first_balance.livecoin + first_balance.binance)  * 100.0 - 100
     end
   end
+
+  def common
+    livecoin + binance
+  end
 end
