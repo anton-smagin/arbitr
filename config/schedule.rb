@@ -15,7 +15,7 @@ every 1.minute do
   runner 'BotRunner.call'
 end
 
-every 12.hours do
+every 1.hour do
   runner 'BotBalance.save_estimated'
 end
 #

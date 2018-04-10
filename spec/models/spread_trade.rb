@@ -8,19 +8,10 @@ RSpec.describe SpreadTrade, type: :model do
 
   let (:exchange) { 'Binance' }
 
-  it '#wins' do
-    create(:spread_trade, exchange: exchange, status: 'finished')
-    expect(SpreadTrade.wins(exchange: exchange, from: 10.seconds.ago))
-      .to eq 1
-    expect(SpreadTrade.loses(exchange: exchange, from: 10.seconds.ago))
-      .to eq 0
-  end
-
-  it '#loses' do
-    create(:spread_trade, exchange: exchange, status: 'sell_failed')
-    expect(SpreadTrade.wins(exchange: exchange, from: 10.seconds.ago))
-      .to eq 0
-    expect(SpreadTrade.loses(exchange: exchange, from: 10.seconds.ago))
-      .to eq 1
+  it '#stats' do
+    create(:spread_trade, exchange: exchange, status: 'finished', symbol: 'LTCBTC')
+    create(:spread_trade, exchange: exchange, status: 'sell_failed', symbol: 'ETHBTC')
+    expect(SpreadTrade.stats(exchange: exchange, from: 10.seconds.ago))
+      .to eq({'LTCBTC' => {wins: 1, loses: 0}, 'ETHBTC' => {wins: 0, loses: 1}})
   end
 end

@@ -13,7 +13,7 @@ class Binance < Exchange
   end
 
   def prices
-    public_get('/api/v1/ticker/24hr')
+    @prices ||= public_get('/api/v1/ticker/24hr')
       .parsed_response
       .select { |pair| pair['symbol'][-3..-1] == 'BTC' }
       .map do |price|
@@ -48,14 +48,14 @@ class Binance < Exchange
   end
 
   def balances
-    account_info['balances']
+    @balances ||= account_info['balances']
       .select { |bal| bal['free'].to_f > 0 || bal['locked'].to_f > 0 }
       .map { |bal| [bal['asset'], bal['free'].to_f + bal['locked'].to_f] }
       .to_h
   end
 
   def account_info
-    get('/api/v3/account')
+    @account_info ||= get('/api/v3/account')
   end
 
   def make_order(symbol:, amount:, direction:, type:, price: nil)

@@ -18,10 +18,23 @@
   </div>
   <div class="row">
     <div class="col-xs-12">
-      <div class="col-xs-3">binance wins: <%= @binance_wins %></div>
-      <div class="col-xs-3">binance loses: <%= @binance_loses %></div>
-      <div class="col-xs-3">livecoin wins: <%= @livecoin_wins %></div>
-      <div class="col-xs-3">livecoin loses: <%= @livecoin_loses %></div>
+      <h2>Spread Statsistic</h2>
+      <table class="table">
+        <thead>
+          <th></th>
+          <th>wins</th>
+          <th>loses</th>
+        </thead>
+        <tbody>
+            <% @binance_stats.each do |symbol, results| %>
+              <tr>
+                <td><%= symbol %></td>
+                <td><%= results[:wins] %></td>
+                <td><%= results[:loses] %></td>
+              </tr>
+            <%  end %>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

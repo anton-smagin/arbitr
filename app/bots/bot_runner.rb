@@ -1,8 +1,11 @@
 class BotRunner
   def self.call
-    exchange = Livecoin.new
-    # SpreadBot.new(exchange, 'XEMBTC', 10).run
-    # SpreadBot.new(exchange, 'DASHBTC', 0.01).run
-    SpreadBot.new(Binance.new, 'IOSTBTC', 400).run
+    exchange = Binance.new
+    SpreadBot.new(exchange, 'LSKBTC', 1).run
+    SpreadBot.new(exchange, 'BLZBTC', 25).run
+    SpreadBot.new(exchange, 'STEEMBTC', 4.2).run
+    SpreadBot.new(exchange, 'AMBBTC', 30).run
+    SpreadBot.new(exchange, 'PPTBTC', 0.7).run
+    SpreadBot.new(exchange, 'SNMBTC', 70).run
   end
 end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180404074157) do
+ActiveRecord::Schema.define(version: 20180410052821) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -37,7 +37,6 @@ ActiveRecord::Schema.define(version: 20180404074157) do
   end
 
   create_table "bot_balances", force: :cascade do |t|
-    t.float "livecoin"
     t.float "binance"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -75,10 +74,9 @@ ActiveRecord::Schema.define(version: 20180404074157) do
     t.string "status"
     t.bigint "buy_order_id"
     t.float "buy_price"
-    t.float "buy_amount"
+    t.float "amount"
     t.bigint "sell_order_id"
     t.float "sell_price"
-    t.float "sell_amount"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

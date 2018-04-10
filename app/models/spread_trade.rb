@@ -3,18 +3,18 @@ class SpreadTrade < ApplicationRecord
    { in: %w[buying selling finished sell_failed buy_failed] }
 
   class << self
-    def wins(exchange:, from:,to: Time.current)
-      where('created_at > ?', from)
+    def stats(exchange:, from:, to: Time.current)
+      where(
+        exchange: exchange.capitalize,
+        status: %w[sell_failed finished]
+      ).where('created_at > ?', from)
         .where('updated_at < ?', to)
-        .where(status: 'finished', exchange: exchange.capitalize)
-        .count
-    end
-
-    def loses(exchange:, from:,to: Time.current)
-        where('created_at > ?', from)
-          .where('updated_at < ?', to)
-          .where(status: 'sell_failed', exchange: exchange.capitalize)
-          .count
+        .group('symbol', 'status').count
+        .each_with_object({}) do |(group, count), result|
+          result[group[0]] ||= { wins: 0, loses: 0 }
+          result[group[0]][:wins] = count if group[1] == 'finished'
+          result[group[0]][:loses] = count if group[1] == 'sell_failed'
+        end
     end
   end
 end

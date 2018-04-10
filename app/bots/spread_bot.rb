@@ -39,7 +39,7 @@ class SpreadBot
           buy_price: price[:buy],
           buy_order_id: buy_order_id,
           sell_price: price[:sell],
-          buy_amount: amount,
+          amount: amount,
           symbol: symbol
         )
       end
