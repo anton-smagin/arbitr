@@ -46,7 +46,7 @@ RSpec.describe SpreadBot do
         status: 'buying',
         buy_order_id: 100,
         buy_price: 0.1,
-        buy_amount: amount,
+        amount: amount,
         sell_price: 0.11
       )
     end

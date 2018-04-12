@@ -103,13 +103,13 @@ class SpreadBot
   end
 
   def buy!
-    exchange.make_order(
-      symbol: symbol,
-      price: price[:buy],
-      direction: 'buy',
-      type: 'limit',
-      amount: amount
-    )
+    # exchange.make_order(
+    #   symbol: symbol,
+    #   price: price[:buy],
+    #   direction: 'buy',
+    #   type: 'limit',
+    #   amount: amount
+    # )
   end
 
   def sell_market!
