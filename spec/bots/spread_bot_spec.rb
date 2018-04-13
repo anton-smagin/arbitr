@@ -3,8 +3,15 @@ require 'rails_helper'
 RSpec.describe SpreadBot do
   let(:symbol) { 'ETHBTC' }
   let(:amount) { 0.5 }
-  let(:bot) { SpreadBot.new(exchange, symbol, amount) }
+  let(:signal) { :flat }
+  let(:bot) { SpreadBot.new(exchange, symbol, amount, signal) }
   let(:prices) { exchange_prices(0.1, 0.11) }
+  let(:exchange) do
+    double(
+      title: 'Livecoin',
+      prices: prices
+    )
+  end
 
   def exchange_prices(buy, sell)
     prices = {}
@@ -12,15 +19,39 @@ RSpec.describe SpreadBot do
     prices
   end
 
-  context 'spread less then commission' do
+  context 'no flat signal' do
+    let(:signal) { :buy }
+    it 'does nothing' do
+      bot.run
+      expect(SpreadTrade.count).to eq 0
+    end
+
     let(:exchange) do
       double(
+        title: 'Livecoin',
         prices: prices,
-        commission: 0.017
+        active_trade: false
       )
     end
 
-    let(:prices) { exchange_prices(0.1, 0.1000000001) }
+    it 'sells if has active trade' do
+      create(
+        :spread_trade,
+        exchange: 'Livecoin',
+        symbol: symbol,
+        status: 'buying',
+        buy_price: 0.1
+      )
+      expect(bot).to receive(:sell!) { 101 }
+      expect(bot).to receive(:buy_order) { false }
+      bot.run
+      expect(SpreadTrade.last.status).to eq 'selling'
+      expect(SpreadTrade.last.sell_order_id).to eq 101
+    end
+  end
+
+  context 'spread less then min commission' do
+    let(:prices) { exchange_prices(0.1, 0.10019) }
 
     it 'does nothing' do
       bot.run

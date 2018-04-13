@@ -1,19 +1,11 @@
 # Bot for spread trade
-class SpreadBot
+class SpreadBot < BaseBot
   CORRIDOR = 0.025
-
-  attr_reader :exchange, :symbol, :amount
-
-  def initialize(exchange, symbol, amount)
-    @exchange = exchange
-    @symbol = symbol
-    @amount = amount
-  end
+  MINIMUM_SPREAD = 0.2
 
   def run
-    return if spread_difference < exchange.commission * 2
     return retrade! if should_retrade?
-    trade!
+    trade! if active_trade || signal == :flat
   end
 
   def retrade!
@@ -31,18 +23,7 @@ class SpreadBot
 
   def trade!
     if !active_trade
-      buy_order_id = buy!
-      if buy_order_id
-        SpreadTrade.create(
-          exchange: exchange.title,
-          status: 'buying',
-          buy_price: price[:buy],
-          buy_order_id: buy_order_id,
-          sell_price: price[:sell],
-          amount: amount,
-          symbol: symbol
-        )
-      end
+      new_trade
     elsif active_trade.status == 'buying' && !buy_order
       sell_order_id = sell!
       if sell_order_id
@@ -53,8 +34,19 @@ class SpreadBot
     end
   end
 
-  def price
-    @price ||= exchange.prices[symbol]
+  def new_trade
+    return if spread_difference < MINIMUM_SPREAD
+    if buy_order_id = buy!
+      SpreadTrade.create(
+        exchange: exchange.title,
+        status: 'buying',
+        buy_price: symbol_price[:buy],
+        buy_order_id: buy_order_id,
+        sell_price: symbol_price[:sell],
+        amount: amount,
+        symbol: symbol
+      )
+    end
   end
 
   def should_retrade?
@@ -72,11 +64,7 @@ class SpreadBot
   end
 
   def corridor
-    [price[:buy] * (1 - CORRIDOR), price[:sell] * (1 + CORRIDOR)]
-  end
-
-  def symbol_price
-    exchange.prices[symbol]
+    [symbol_price[:buy] * (1 - CORRIDOR), symbol_price[:sell] * (1 + CORRIDOR)]
   end
 
   def spread_difference
@@ -103,20 +91,11 @@ class SpreadBot
   end
 
   def buy!
-    # exchange.make_order(
-    #   symbol: symbol,
-    #   price: price[:buy],
-    #   direction: 'buy',
-    #   type: 'limit',
-    #   amount: amount
-    # )
-  end
-
-  def sell_market!
     exchange.make_order(
       symbol: symbol,
-      direction: 'sell',
-      type: 'market',
+      price: symbol_price[:buy],
+      direction: 'buy',
+      type: 'limit',
       amount: amount
     )
   end

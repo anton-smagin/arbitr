@@ -10,10 +10,21 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180410052821) do
+ActiveRecord::Schema.define(version: 20180413131853) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "alligator_trades", force: :cascade do |t|
+    t.string "exchange"
+    t.string "symbol"
+    t.string "status"
+    t.float "amount"
+    t.float "buy_price"
+    t.float "sell_price"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
 
   create_table "arbitrage_statistics", force: :cascade do |t|
     t.float "percent"

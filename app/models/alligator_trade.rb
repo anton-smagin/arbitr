@@ -1,0 +1,2 @@
+class AlligatorTrade < ApplicationRecord
+end
