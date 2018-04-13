@@ -22,6 +22,21 @@ class Binance < Exchange
       end.to_h
   end
 
+  def ticks(params = {})
+    params[:endTime] = params.delete(:end_time).to_i * 1000 if params[:end_time]
+    params[:startTime] = params.delete(:start_time).to_i * 1000 if params[:start_time]
+    public_get('/api/v1/klines', params)
+      .parsed_response
+      .map do |tick|
+        [[:open_time, Time.at(tick[0] / 1000)],
+         [:close_time, Time.at(tick[6] / 1000)],
+         [:open, tick[1].to_f],
+         [:high, tick[2].to_f],
+         [:low, tick[3].to_f],
+         [:close, tick[4].to_f]].to_h
+      end
+  end
+
   def symbols
     prices.keys
   end
