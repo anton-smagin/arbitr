@@ -5,7 +5,13 @@ class BalanceController < ApplicationController
       BotBalance.where('created_at > ?', days.day.ago).map do |balance|
         [balance.created_at, balance.common]
       end.to_h
-    @binance_stats = SpreadTrade.stats(exchange: 'Binance', from: days.day.ago)
+    @estimated_balance = @chart.values.last.round(6)
+    @balance_change =
+      (@chart.values.last / @chart.values.first * 100 - 100).round(2)
+    @binance_spread_stats =
+      SpreadTrade.stats(exchange: 'Binance', from: days.day.ago)
+    @binance_alligator_stats =
+      AlligatorTrade.stats(exchange: 'Binance', from: days.day.ago)
   end
 
   def days

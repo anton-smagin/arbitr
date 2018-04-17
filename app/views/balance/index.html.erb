@@ -3,23 +3,34 @@
     <h2>Balance chart</h2>
   </div>
   <div class="row">
-    <form class="form-inline" action="/balance" method="get">
-      <div class="form-group mb-2">
-        <label for="days">For last days:</label>
-        <input class="form-control" type="text" name="days" value="<%= days %>">
-      </div>
-      <button type="submit" class="btn-sm btn-primary"> Get </button>
-    </form>
-  </div>
-  <div class="row">
-    <div class="col-xs-12">
-      <%= line_chart @chart %>
+    <div class="col-xs-6">
+      <form class="form-inline" action="/balance" method="get">
+        <div class="form-group">
+          <label for="days">For last days:</label>
+          <input class="form-control" type="text" name="days" value="<%= days %>">
+        </div>
+        <button type="submit" class="btn-sm btn-primary"> Get </button>
+      </form>
+    </div>
+    <div class="col-xs-3 pull-right">
+      Change: <%= @balance_change %> %
+    </div>
+    <div class="col-xs-3 pull-right">
+      Estimated balance: <%= @estimated_balance %>
     </div>
   </div>
   <div class="row">
     <div class="col-xs-12">
-      <h2>Spread Statsistic</h2>
-      <p>average spread <b><%= @binance_stats['Total'][:avg_spread].round(2)  %>%</b></p>
+      <%=
+        line_chart @chart, min: @chart.values.min * 0.9, max:
+            @chart.values.max * 1.1, points: false
+      %>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <h2>Spread Statistic</h2>
+      <p>average spread <b><%= @binance_spread_stats['Total'][:avg_spread] %>%</b></p>
       <table class="table">
         <thead>
           <th></th>
@@ -27,11 +38,38 @@
           <th>loses</th>
         </thead>
         <tbody>
-            <% @binance_stats.each do |symbol, results| %>
+            <% @binance_spread_stats.each do |symbol, results| %>
               <tr>
                 <td><%= symbol %></td>
                 <td><%= results[:wins] %></td>
                 <td><%= results[:loses] %></td>
+              </tr>
+            <%  end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <h2>Alligator Statistic</h2>
+      <table class="table">
+        <thead>
+          <th></th>
+          <th>wins</th>
+          <th>loses</th>
+          <th>avg profit</th>
+          <th>max lose</th>
+          <th>max profit</th>
+        </thead>
+        <tbody>
+            <% @binance_alligator_stats.each do |symbol, results| %>
+              <tr>
+                <td><%= symbol %></td>
+                <td><%= results[:wins] %></td>
+                <td><%= results[:loses] %></td>
+                <td><%= results[:avg_profit] %>%</td>
+                <td><%= results[:max_lose] %>%</td>
+                <td><%= results[:max_profit] %>%</td>
               </tr>
             <%  end %>
         </tbody>
