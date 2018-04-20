@@ -23,7 +23,8 @@ class BotRunner
       'STEEMBTC' => 4.2,
       'AMBBTC' => 30,
       'PPTBTC' => 0.7,
-      'SNMBTC' => 70
+      'SNMBTC' => 70,
+      'CDTBTC' => 180
     }
   end
 
