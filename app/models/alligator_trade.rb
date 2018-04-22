@@ -34,7 +34,8 @@ class AlligatorTrade < ApplicationRecord
         loses: trade.loses,
         max_profit: trade.max_profit&.round(2),
         max_lose: trade.max_lose&.round(2),
-        avg_profit: trade.avg_profit&.round(2)
+        avg_profit: trade.avg_profit&.round(2),
+        current_status: trade.current_status == 1 ? 'buying' : 'finished'
       }
     end
 
@@ -43,7 +44,8 @@ class AlligatorTrade < ApplicationRecord
         'count(*) filter(where sell_price <= buy_price) as loses,' \
         'max(sell_price / buy_price * 100 - 100) as max_profit, ' \
         'min(sell_price / buy_price * 100 - 100) as max_lose, ' \
-        'avg(sell_price / buy_price * 100 - 100) as avg_profit'
+        'avg(sell_price / buy_price * 100 - 100) as avg_profit, ' \
+        "count(status) filter(where status = 'buying') as current_status"
     end
   end
 end

@@ -25,11 +25,27 @@ RSpec.describe SpreadTrade, type: :model do
       buy_price: 1,
       sell_price: 1.1
     )
+    create(
+      :spread_trade,
+      exchange: exchange,
+      status: 'selling',
+      symbol: 'ETHBTC',
+      buy_price: 1,
+      sell_price: 1.1
+    )
+    create(
+      :spread_trade,
+      exchange: exchange,
+      status: 'buying',
+      symbol: 'LTCBTC',
+      buy_price: 1,
+      sell_price: 1.1
+    )
     expect(SpreadTrade.stats(exchange: exchange, from: 10.seconds.ago))
       .to eq(
         {
-         'LTCBTC' => { wins: 1, loses: 0 },
-         'ETHBTC' => { wins: 0, loses: 1 },
+         'LTCBTC' => { wins: 1, loses: 0, current_status: 'buying' },
+         'ETHBTC' => { wins: 0, loses: 1, current_status: 'selling' },
          'Total' => { wins: 1, loses: 1, avg_spread: 10.0 }
          }
       )

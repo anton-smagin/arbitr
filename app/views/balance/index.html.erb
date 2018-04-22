@@ -36,6 +36,7 @@
           <th></th>
           <th>wins</th>
           <th>loses</th>
+          <th>current status</th>
         </thead>
         <tbody>
             <% @binance_spread_stats.each do |symbol, results| %>
@@ -43,6 +44,7 @@
                 <td><%= symbol %></td>
                 <td><%= results[:wins] %></td>
                 <td><%= results[:loses] %></td>
+                <td><%= results[:current_status] %></td>
               </tr>
             <%  end %>
         </tbody>
@@ -60,6 +62,8 @@
           <th>avg profit</th>
           <th>max lose</th>
           <th>max profit</th>
+          <th>current status</th>
+          <th>current signal</th>
         </thead>
         <tbody>
             <% @binance_alligator_stats.each do |symbol, results| %>
@@ -70,6 +74,8 @@
                 <td><%= results[:avg_profit] %>%</td>
                 <td><%= results[:max_lose] %>%</td>
                 <td><%= results[:max_profit] %>%</td>
+                <td><%= results[:current_status] %></td>
+                <td><%= results[:current_signal] %></td>
               </tr>
             <%  end %>
         </tbody>
