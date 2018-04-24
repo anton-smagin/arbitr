@@ -149,7 +149,7 @@ class Binance < Exchange
 
   def price_to_precision(price, symbol)
     symbol_info = exchange_info['symbols'].find { |s| s['symbol'] == symbol }
-    price.round(symbol_info['quotePrecision'])
+    price.round(symbol_info['quotePrecision'] - 1)
   end
 
   def minimum_lot(symbol)
