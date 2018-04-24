@@ -1,8 +1,23 @@
 class BotRunner
   INTERVAL = '1h'.freeze
+  class << self
+    def call
+      new.run
+    end
 
-  def self.call
-    new.run
+    def statistic
+      @runner = new
+      @runner.trade_symbols.map do |symbol, amount|
+        [
+          symbol,
+          {
+            trade_amount: amount,
+            signal: @runner.alligator_signal(symbol),
+            balance: @runner.binance_exchange.balances[symbol.sub('BTC', '')]
+          }
+        ]
+      end.to_h
+    end
   end
 
   def run

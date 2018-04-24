@@ -29,6 +29,29 @@
   </div>
   <div class="row">
     <div class="col-xs-12">
+      <h2>Bot Statistic</h2>
+      <table class="table">
+        <thead>
+          <th></th>
+          <th>current signal</th>
+          <th>balance</th>
+          <th>trade amount</th>
+        </thead>
+        <tbody>
+          <% @bot_statistic.each do |symbol, results| %>
+            <tr>
+              <td><%= symbol %></td>
+              <td><%= results[:signal] %></td>
+              <td><%= results[:balance] %></td>
+              <td><%= results[:trade_amount] %></td>
+            </tr>
+          <% end %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
       <h2>Spread Statistic</h2>
       <p>average spread <b><%= @binance_spread_stats['Total'][:avg_spread] %>%</b></p>
       <table class="table">
@@ -63,7 +86,6 @@
           <th>max lose</th>
           <th>max profit</th>
           <th>current status</th>
-          <th>current signal</th>
         </thead>
         <tbody>
             <% @binance_alligator_stats.each do |symbol, results| %>
@@ -75,7 +97,6 @@
                 <td><%= results[:max_lose] %>%</td>
                 <td><%= results[:max_profit] %>%</td>
                 <td><%= results[:current_status] %></td>
-                <td><%= results[:current_signal] %></td>
               </tr>
             <%  end %>
         </tbody>

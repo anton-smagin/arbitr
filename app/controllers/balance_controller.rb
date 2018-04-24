@@ -12,15 +12,7 @@ class BalanceController < ApplicationController
       SpreadTrade.stats(exchange: 'Binance', from: days.day.ago)
     @binance_alligator_stats =
       AlligatorTrade.stats(exchange: 'Binance', from: days.day.ago)
-    @binance_alligator_stats.each do |symbol, _|
-      next if symbol == 'Total'
-      @binance_alligator_stats[symbol][:current_signal] = alligator_signal(symbol)
-    end
-  end
-
-  def alligator_signal(symbol)
-    @bot_runner ||= BotRunner.new
-    @bot_runner.alligator_signal(symbol)
+    @bot_statistic = BotRunner.statistic
   end
 
   def days
