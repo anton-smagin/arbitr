@@ -10,12 +10,14 @@ class SpreadBot < BaseBot
 
   def retrade!
     if active_trade.status == 'buying'
-      exchange.cancel_order(symbol, active_trade.buy_order_id)
-      active_trade.update(status: 'buy_failed')
+      if exchange.cancel_order(symbol, active_trade.buy_order_id)
+        active_trade.update(status: 'buy_failed')
+      end
     elsif active_trade.status == 'selling'
-      exchange.cancel_order(symbol, active_trade.sell_order_id)
-      active_trade.update(status: 'sell_failed')
-      sell_market!
+      if exchange.cancel_order(symbol, active_trade.sell_order_id)
+        active_trade.update(status: 'sell_failed')
+        sell_market!
+      end
     end
     @active_trade = nil
     trade!
@@ -50,17 +52,21 @@ class SpreadBot < BaseBot
   end
 
   def should_retrade?
-    return false unless %w[selling buying].include?(active_trade&.status)
-    price_not_in_corridor?
+    if active_trade&.status == 'buying' && buy_order ||
+        active_trade&.status == 'selling' && sell_order
+      !price_in_corridor?
+    else
+      false
+    end
   end
 
-  def price_not_in_corridor?
+  def price_in_corridor?
     trading_price = if active_trade.status == 'selling'
                       active_trade[:sell_price]
                     elsif active_trade.status == 'buying'
                       active_trade[:buy_price]
                     end
-    !trading_price.between?(*corridor)
+    trading_price.between?(*corridor)
   end
 
   def corridor

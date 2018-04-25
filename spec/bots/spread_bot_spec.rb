@@ -43,7 +43,7 @@ RSpec.describe SpreadBot do
         buy_price: 0.1
       )
       expect(bot).to receive(:sell!) { 101 }
-      expect(bot).to receive(:buy_order) { false }
+      expect(bot).to receive(:buy_order).twice { false }
       bot.run
       expect(SpreadTrade.last.status).to eq 'selling'
       expect(SpreadTrade.last.sell_order_id).to eq 101
@@ -105,13 +105,13 @@ RSpec.describe SpreadBot do
 
     it 'does nothing if has active trade and buy order exists' do
       expect(bot).to_not receive(:sell!)
-      expect(bot).to receive(:buy_order) { 100 }
+      expect(bot).to receive(:buy_order).twice { 100 }
       expect { bot.run }.to_not(change { active_trade.reload.status })
     end
 
     it 'sells if has active trade and buy order does not exist' do
       expect(bot).to receive(:sell!) { 100 }
-      expect(bot).to receive(:buy_order) { false }
+      expect(bot).to receive(:buy_order).twice { false }
       bot.run
       expect(SpreadTrade.last.status).to eq 'selling'
     end
@@ -138,12 +138,12 @@ RSpec.describe SpreadBot do
     end
 
     it 'does nothing if has active trade and sell order exists' do
-      expect(bot).to receive(:sell_order) { 101 }
+      expect(bot).to receive(:sell_order).twice { 101 }
       expect { bot.run }.to_not(change { active_trade.reload.status })
     end
 
     it 'change active trade status to finished' do
-      expect(bot).to receive(:sell_order) { false }
+      expect(bot).to receive(:sell_order).twice { false }
       expect do
         bot.run
       end.to(change { active_trade.reload.status }.to('finished'))
@@ -160,24 +160,62 @@ RSpec.describe SpreadBot do
         cancel_order: true
       )
     end
+    context 'selling' do
+      let(:active_trade) do
+        create(
+          :spread_trade,
+          exchange: 'Livecoin',
+          symbol: symbol,
+          status: 'selling',
+          sell_price: 0.11,
+          buy_price: 0.1
+        )
+      end
 
-    let(:active_trade) do
-      create(
-        :spread_trade,
-        exchange: 'Livecoin',
-        symbol: symbol,
-        status: 'selling',
-        sell_price: 0.11,
-        buy_price: 0.1
-      )
+      it 'retrade' do
+        expect(bot).to receive(:buy!) { 100 }
+        expect(bot).to receive(:sell_order) { true }
+        expect(bot).to receive(:sell_market!) { 101 }
+        bot.run
+        expect(SpreadTrade.where(status: 'sell_failed').count).to eq 1
+        expect(SpreadTrade.where(status: 'buying').count).to eq 1
+      end
+
+      it 'would not retrade if no sell order' do
+        expect(bot).to receive(:sell_order).twice { false }
+        expect(bot).not_to receive(:retrade!)
+        bot.run
+        expect(SpreadTrade.where(status: 'finished').count).to eq 1
+      end
     end
 
-    it 'retrade' do
-      expect(bot).to receive(:buy!) { 100 }
-      expect(bot).to receive(:sell_market!) { 101 }
-      bot.run
-      expect(SpreadTrade.where(status: 'sell_failed').count).to eq 1
-      expect(SpreadTrade.where(status: 'buying').count).to eq 1
+    context 'buying' do
+      let(:active_trade) do
+        create(
+          :spread_trade,
+          exchange: 'Livecoin',
+          symbol: symbol,
+          status: 'buying',
+          sell_price: 0.11,
+          buy_price: 0.1
+        )
+      end
+
+      it 'retrade' do
+        expect(bot).to receive(:buy!) { 100 }
+        expect(bot).to receive(:buy_order) { true }
+        bot.run
+        expect(SpreadTrade.where(status: 'buy_failed').count).to eq 1
+        expect(SpreadTrade.where(status: 'buying').count).to eq 1
+      end
+
+      it 'would not retrade if no buy order' do
+        expect(bot).to receive(:buy_order).twice { false }
+        expect(bot).not_to receive(:retrade!)
+        expect(bot).to receive(:sell!) { 100 }
+        bot.run
+        expect(SpreadTrade.where(status: 'selling').count).to eq 1
+      end
     end
   end
 end

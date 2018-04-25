@@ -89,8 +89,11 @@ class Binance < Exchange
   end
 
   def cancel_order(symbol, order_id)
-    delete '/api/v3/order', symbol:
-      binance_symbol_representation(symbol), orderId: order_id
+    delete(
+      '/api/v3/order',
+      symbol: binance_symbol_representation(symbol),
+      orderId: order_id
+    )['orderId'].present?
   end
 
   def active_orders
