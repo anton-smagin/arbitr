@@ -1,6 +1,6 @@
 # Bot for spread trade
 class SpreadBot < BaseBot
-  CORRIDOR = 0.025
+  CORRIDOR = 0.02
   MINIMUM_SPREAD = 0.2
 
   def run
@@ -15,7 +15,10 @@ class SpreadBot < BaseBot
       end
     elsif active_trade.status == 'selling'
       if exchange.cancel_order(symbol, active_trade.sell_order_id)
-        active_trade.update(status: 'sell_failed')
+        active_trade.update(
+          status: 'sell_failed',
+          sell_price: symbol_price[:buy]
+        )
         sell_market!
       end
     end

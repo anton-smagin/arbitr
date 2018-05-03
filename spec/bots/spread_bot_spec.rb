@@ -167,8 +167,8 @@ RSpec.describe SpreadBot do
           exchange: 'Livecoin',
           symbol: symbol,
           status: 'selling',
-          sell_price: 0.11,
-          buy_price: 0.1
+          sell_price: 0.3,
+          buy_price: 0.29
         )
       end
 
@@ -178,6 +178,7 @@ RSpec.describe SpreadBot do
         expect(bot).to receive(:sell_market!) { 101 }
         bot.run
         expect(SpreadTrade.where(status: 'sell_failed').count).to eq 1
+        expect(SpreadTrade.find_by(status: 'sell_failed').sell_price).to eq 0.2
         expect(SpreadTrade.where(status: 'buying').count).to eq 1
       end
 
