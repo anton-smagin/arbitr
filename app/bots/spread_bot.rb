@@ -110,14 +110,10 @@ class SpreadBot < BaseBot
   end
 
   def buy_order
-    %i[open partially_filled].include?(
-        exchange.order_status(active_trade.buy_order_id, symbol)
-      )
+    exchange.order_status(active_trade.buy_order_id, symbol) != :filled
   end
 
   def sell_order
-    %i[open partially_filled].include?(
-      exchange.order_status(active_trade.sell_order_id, symbol)
-    )
+    exchange.order_status(active_trade.sell_order_id, symbol) != :filled
   end
 end
