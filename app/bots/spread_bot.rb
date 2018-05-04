@@ -1,6 +1,6 @@
 # Bot for spread trade
 class SpreadBot < BaseBot
-  CORRIDOR = 0.02
+  CORRIDOR = 0.03
   MINIMUM_SPREAD = 0.2
 
   def run
