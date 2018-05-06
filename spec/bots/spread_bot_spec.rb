@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe SpreadBot do
   let(:symbol) { 'ETHBTC' }
   let(:amount) { 0.5 }
-  let(:signal) { :flat }
+  let(:signal) { { symbol_signal: :flat, btc_signal: :flat } }
   let(:bot) { SpreadBot.new(exchange, symbol, amount, signal) }
   let(:prices) { exchange_prices(0.1, 0.11) }
   let(:exchange) do
@@ -19,21 +19,7 @@ RSpec.describe SpreadBot do
     prices
   end
 
-  context 'no flat signal' do
-    let(:signal) { :buy }
-    it 'does nothing' do
-      bot.run
-      expect(SpreadTrade.count).to eq 0
-    end
-
-    let(:exchange) do
-      double(
-        title: 'Livecoin',
-        prices: prices,
-        active_trade: false
-      )
-    end
-
+  shared_examples 'sells if has active trade' do
     it 'sells if has active trade' do
       create(
         :spread_trade,
@@ -50,13 +36,35 @@ RSpec.describe SpreadBot do
     end
   end
 
-  context 'spread less then min commission' do
-    let(:prices) { exchange_prices(0.1, 0.10019) }
-
+  shared_examples 'it does nothing' do
     it 'does nothing' do
       bot.run
       expect(SpreadTrade.count).to eq 0
     end
+  end
+
+  context 'no flat btc signal' do
+    let(:signal) { { symbol_signal: :flat, btc_signal: :buy } }
+    include_examples 'it does nothing'
+    let(:exchange) do
+      double(title: 'Livecoin', prices: prices, active_trade: true)
+    end
+    include_examples 'sells if has active trade'
+  end
+
+  context 'no flat signal' do
+    let(:signal) { { symbol_signal: :buy, btc_signal: :flat } }
+    include_examples 'it does nothing'
+    let(:exchange) do
+      double(title: 'Livecoin', prices: prices, active_trade: true)
+    end
+    include_examples 'sells if has active trade'
+  end
+
+  context 'spread less then min commission' do
+    let(:prices) { exchange_prices(0.1, 0.10019) }
+
+    include_examples 'it does nothing'
   end
 
   context 'no active spread trade' do

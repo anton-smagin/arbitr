@@ -5,7 +5,7 @@ class SpreadBot < BaseBot
 
   def run
     return retrade! if should_retrade?
-    trade! if active_trade || signal == :flat
+    trade! if active_trade || signal.values.uniq == [:flat]
   end
 
   def retrade!

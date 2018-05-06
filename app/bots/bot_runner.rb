@@ -21,11 +21,26 @@ class BotRunner
   end
 
   def run
+    btc_signal = alligator_signal('BTCUSDT')
     trade_symbols.each do |symbol, amount|
       symbol_signal = alligator_signal(symbol)
-      SpreadBot.new(binance_exchange, symbol, amount, symbol_signal).run
-      AlligatorBot.new(binance_exchange, symbol, amount, symbol_signal).run
+      SpreadBot.new(
+        binance_exchange,
+        symbol,
+        amount,
+        { symbol_signal: symbol_signal, btc_signal: btc_signal }
+      ).run
+      AlligatorBot.new(
+        binance_exchange,
+        symbol,
+        amount,
+        { symbol_signal: symbol_signal, btc_signal: btc_signal }
+      ).run
     end
+    BtcUsdtBot.new(
+      binance_exchange,
+      btc_signal
+    ).run
   end
 
   def binance_exchange

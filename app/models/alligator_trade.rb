@@ -1,5 +1,5 @@
 class AlligatorTrade < ApplicationRecord
-  validates :status, inclusion: { in: %w[buying finished] }
+  validates :status, inclusion: { in: %w[buying selling finished] }
 
   class << self
     def stats(exchange:, from:, to: Time.current)
@@ -35,7 +35,7 @@ class AlligatorTrade < ApplicationRecord
         max_profit: trade.max_profit&.round(2),
         max_lose: trade.max_lose&.round(2),
         avg_profit: trade.avg_profit&.round(2),
-        current_status: trade.current_status == 1 ? 'buying' : 'finished'
+        current_status: trade.current_status > 0 ? 'buying' : 'finished'
       }
     end
 
@@ -45,7 +45,7 @@ class AlligatorTrade < ApplicationRecord
         'max(sell_price / buy_price * 100 - 100) as max_profit, ' \
         'min(sell_price / buy_price * 100 - 100) as max_lose, ' \
         'avg(sell_price / buy_price * 100 - 100) as avg_profit, ' \
-        "count(status) filter(where status = 'buying') as current_status"
+        "count(status) filter(where status in ('buying', 'selling')) as current_status"
     end
   end
 end

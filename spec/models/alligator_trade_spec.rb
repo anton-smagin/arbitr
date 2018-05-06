@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe AlligatorTrade, type: :model do
   it do
     should validate_inclusion_of(:status)
-      .in_array(%w[buying finished])
+      .in_array(%w[buying finished selling])
   end
 
   let (:exchange) { 'Binance' }

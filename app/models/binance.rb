@@ -13,12 +13,13 @@ class Binance < Exchange
   end
 
   def prices
-    @prices ||= public_get('/api/v1/ticker/24hr')
+    @prices ||=
+      public_get('/api/v1/ticker/24hr')
       .parsed_response
-      .select { |pair| pair['symbol'][-3..-1] == 'BTC' }
+      .select { |pair| %w[BTC SDT].include? pair['symbol'][-3..-1] }
       .map do |price|
         [price['symbol'],
-         { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f }]
+        { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f }]
       end.to_h
   end
 
@@ -63,7 +64,8 @@ class Binance < Exchange
   end
 
   def balances
-    @balances ||= account_info['balances']
+    @balances ||=
+      account_info['balances']
       .select { |bal| bal['free'].to_f > 0 || bal['locked'].to_f > 0 }
       .map { |bal| [bal['asset'], bal['free'].to_f + bal['locked'].to_f] }
       .to_h
@@ -78,7 +80,7 @@ class Binance < Exchange
       symbol: binance_symbol_representation(symbol),
       side: direction.upcase,
       type: type.upcase,
-      quantity: amount
+      quantity: amount_to_precision(amount, symbol)
     }
     if price
       payload[:price] = price_to_precision(price, symbol).to_d
@@ -148,6 +150,13 @@ class Binance < Exchange
 
   def exchange_info
     @exhange_info ||= public_get('/api/v1/exchangeInfo').parsed_response
+  end
+
+  def amount_to_precision(amount, symbol)
+    lot_size = exchange_info['symbols']
+               .find { |s| s['symbol'] == symbol }['filters'][1]['stepSize']
+    precision = (Math.log10(lot_size.to_f) * -1).to_i
+    amount.to_d.round(precision, :down).to_f
   end
 
   def price_to_precision(price, symbol)

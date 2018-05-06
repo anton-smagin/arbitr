@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe AlligatorBot do
   let(:symbol) { 'ETHBTC' }
   let(:amount) { 0.5 }
-  let(:signal) { :buy }
+  let(:signal) { { symbol_signal: :buy, btc_signal: :flat } }
   let(:bot) { AlligatorBot.new(exchange, symbol, amount, signal) }
   let(:prices) do
     prices = {}
@@ -16,6 +16,32 @@ RSpec.describe AlligatorBot do
       prices: prices,
       make_order: true
     )
+  end
+
+  shared_examples 'does nothing' do
+    it 'does nothing' do
+      expect(bot).to_not receive(:buy_market!)
+      bot.run
+      expect(AlligatorTrade.count).to eq 0
+    end
+  end
+
+  shared_examples 'sells if active trade' do
+    it 'sells if active trade' do
+      create(
+        :alligator_trade,
+        symbol: symbol,
+        exchange: exchange.title,
+        status: 'buying'
+      )
+      expect(bot).to receive(:sell_market!) { 2 }
+      bot.run
+      expect(AlligatorTrade.last).to have_attributes(
+        sell_price: 0.1,
+        symbol: symbol,
+        status: 'finished'
+      )
+    end
   end
 
   context 'buy signal' do
@@ -42,27 +68,15 @@ RSpec.describe AlligatorBot do
   end
 
   context 'flat signal' do
-    let(:signal) { :flat }
-    it 'does nothing' do
-      expect(bot).to_not receive(:buy_market!)
-      bot.run
-      expect(AlligatorTrade.count).to eq 0
-    end
+    let(:signal) { { symbol_signal: :flat, btc_signal: :flat }  }
 
-    it 'sells if active trade' do
-      create(
-        :alligator_trade,
-        symbol: symbol,
-        exchange: exchange.title,
-        status: 'buying'
-      )
-      expect(bot).to receive(:sell_market!) { 2 }
-      bot.run
-      expect(AlligatorTrade.last).to have_attributes(
-        sell_price: 0.1,
-        symbol: symbol,
-        status: 'finished'
-      )
-    end
+    include_examples 'does nothing'
+    include_examples 'sells if active trade'
+  end
+
+  context 'not flat signal for BTC' do
+    let(:signal) { { symbol_signal: :flat, btc_signal: :buy } }
+    include_examples 'does nothing'
+    include_examples 'sells if active trade'
   end
 end
