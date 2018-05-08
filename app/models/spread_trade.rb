@@ -39,8 +39,8 @@ class SpreadTrade < ApplicationRecord
                 'avg(sell_price / buy_price) * 100 - 100 as avg, status'
               ).to_a
       {
-        wins: stats.find { |s| s.status == 'finished' }.count_all,
-        loses: stats.find { |s| s.status == 'sell_failed' }.count_all,
+        wins: stats.find { |s| s.status == 'finished' }&.count_all,
+        loses: stats.find { |s| s.status == 'sell_failed' }&.count_all,
         avg_spread: (stats.reduce(0) { |sum, stat| sum + stat.avg } / 2)&.round(2)
       }
     end

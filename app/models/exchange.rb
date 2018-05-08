@@ -3,7 +3,11 @@ class Exchange
     balance_hash = balances
     btc_balance = balance_hash.delete('BTC')
     btc_balance + balance_hash.reduce(0) do |sum, n|
-      sum + prices["#{n[0]}BTC"][:buy] * n[1]
+      if n[0] == 'USDT'
+        sum +  n[1] / prices["BTC#{n[0]}"][:sell]
+      else
+        sum + prices["#{n[0]}BTC"][:buy] * n[1]
+      end
     end.round(8)
   end
 
