@@ -24,12 +24,12 @@ class BotRunner
     btc_signal = alligator_signal('BTCUSDT')
     trade_symbols.each do |symbol, amount|
       symbol_signal = alligator_signal(symbol)
-      SpreadBot.new(
-        binance_exchange,
-        symbol,
-        amount,
-        { symbol_signal: symbol_signal, btc_signal: btc_signal }
-      ).run
+      # SpreadBot.new(
+      #   binance_exchange,
+      #   symbol,
+      #   amount,
+      #   { symbol_signal: symbol_signal, btc_signal: btc_signal }
+      # ).run
       AlligatorBot.new(
         binance_exchange,
         symbol,
@@ -60,8 +60,21 @@ class BotRunner
 
   def alligator_signal(symbol)
     ticks = binance_exchange
-            .ticks(symbol: symbol, interval: INTERVAL, limit: 30)
+            .ticks(symbol: symbol, interval: INTERVAL, limit: 50)
             .map { |tick| [tick[:high], tick[:low]] }
     AlligatorSignal.call(ticks)
+  end
+
+  def last_signals(num, symbol)
+    result = {}
+    ticks = binance_exchange
+            .ticks(symbol: symbol, interval: INTERVAL, limit: num + 50)
+    ticks[50..-1].each_with_index do |t, i|
+      result[ticks[i+50][:close_time]] =
+        AlligatorSignal.call(
+          ticks[i..i+50].map { |tick| [tick[:high], tick[:low]] }
+        )
+    end
+    result
   end
 end
