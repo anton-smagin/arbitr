@@ -1,7 +1,7 @@
 # Bot for alligator trade
 class AlligatorBot < BaseBot
   def run
-    if signal[:symbol_signal] == :buy && signal[:btc_signal] == :flat
+    if signal[:symbol_signal] == :buy # && signal[:btc_signal] == :flat
       return if active_trade || !buy_market!
       AlligatorTrade.create(
         amount: amount,

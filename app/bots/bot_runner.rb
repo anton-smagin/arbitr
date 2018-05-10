@@ -16,7 +16,7 @@ class BotRunner
             balance: @runner.binance_exchange.balances[symbol.sub('BTC', '')]
           }
         ]
-      end.to_h
+      end.to_h.merge(btc: { signal: @runner.alligator_signal('BTCUSDT') })
     end
   end
 
@@ -49,12 +49,9 @@ class BotRunner
 
   def trade_symbols
     {
-      'LSKBTC' => 1,
-      'STEEMBTC' => 4.2,
-      'AMBBTC' => 30,
-      'PPTBTC' => 0.7,
-      'SNMBTC' => 70,
-      'CDTBTC' => 180
+      'EOSBTC' => 0.58,
+      'AEBTC' => 2.15,
+      'XEMBTC' => 28
     }
   end
 

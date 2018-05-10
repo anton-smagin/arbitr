@@ -87,7 +87,6 @@ class Binance < Exchange
       payload[:timeInForce] = 'GTC'
     end
     response = post('/api/v3/order', payload)
-    binding.pry
     response['orderId'] || false
   end
 

@@ -49,16 +49,6 @@ RSpec.describe BtcUsdtBot do
 
   context 'sell signal' do
     let(:signal) { :sell }
-    context 'balance < BTC_MIN_LOT' do
-      let(:exchange) do
-        double(
-          title: 'Livecoin',
-          prices: prices,
-          balance: BtcUsdtBot::MIN_BTC_LOT - 0.0001
-        )
-      end
-      include_examples 'it does nothing'
-    end
 
     it 'sells if sell signal' do
       expect(bot).to receive(:sell_market!) { 1 }
@@ -67,7 +57,7 @@ RSpec.describe BtcUsdtBot do
     end
 
     it 'has BTC balance amount' do
-      expect(bot.amount).to eq 0.1
+      expect(bot.amount).to eq 0.0025
     end
   end
 end

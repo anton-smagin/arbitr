@@ -6,7 +6,7 @@ class BtcUsdtBot < BaseBot
     @exchange = exchange
     amount =
       if signal == :sell
-        exchange.balance('BTC')
+        0.0025
       else
         exchange.balance('USDT') / exchange.prices[@symbol][:sell]
       end
