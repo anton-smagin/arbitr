@@ -39,8 +39,10 @@ RSpec.describe BtcUsdtBot do
         expect(AlligatorTrade.where(status: 'finished').count).to eq 3
       end
 
-      it 'has amount that equals sum of active trades' do
-        expect(bot.amount).to eq 3
+      it 'has amount that equals expected btc amount' do
+        expect(bot.amount).to(
+          eq(BtcUsdtBot::MIN_BTC_LOT / prices['BTCUSDT'][:sell])
+        )
       end
     end
   end

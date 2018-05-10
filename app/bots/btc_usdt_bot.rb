@@ -8,7 +8,7 @@ class BtcUsdtBot < BaseBot
       if signal == :sell
         exchange.balance('BTC')
       else
-        active_trades.map(&:amount).reduce(:+)
+        exchange.balance('USDT') / exchange.prices[@symbol][:sell]
       end
     super(exchange, symbol, amount, signal)
   end
