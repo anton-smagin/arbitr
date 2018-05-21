@@ -32,3 +32,15 @@ task arbitrage_task: :environment do
 
   seller.withdraw('BTC', wallet.deposit_address)
 end
+
+task arbitrage_statistic_collect: :environment do
+  ArbitrageStatistic.collect
+end
+
+task bot_run: :environment do
+  BotRunner.call
+end
+
+task save_balance: :environment do
+  BotBalance.save_estimated
+end
