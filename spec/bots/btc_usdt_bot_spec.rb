@@ -57,7 +57,7 @@ RSpec.describe BtcUsdtBot do
     end
 
     it 'has BTC balance amount' do
-      expect(bot.amount).to eq 0.0025
+      expect(bot.amount).to eq BtcUsdtBot::TRADE_AMOUNT
     end
   end
 end
