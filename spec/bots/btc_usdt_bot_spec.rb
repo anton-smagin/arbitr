@@ -53,7 +53,7 @@ RSpec.describe BtcUsdtBot do
     it 'sells if sell signal' do
       expect(bot).to receive(:sell_market!) { 1 }
       bot.run
-      expect(AlligatorTrade.where(status: 'selling').count).to eq 1
+      expect(AlligatorTrade.where(status: 'selling').count).to eq(1)
     end
 
     it 'has BTC balance amount' do

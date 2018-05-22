@@ -15,11 +15,11 @@ class BtcUsdtBot < BaseBot
   end
 
   def run
-    if signal == :sell && active_trades.count.zero?
+    if signal == :sell && active_trades.empty?
       return unless sell_market!
       AlligatorTrade.create amount: amount, symbol: symbol, exchange:
         exchange.title, buy_price: symbol_price[:buy], status: 'selling'
-    elsif active_trades.count > 0
+    elsif signal != :sell && active_trades.any?
       return unless buy_market!
       active_trades.update_all status: 'finished', sell_price:
         symbol_price[:sell]
