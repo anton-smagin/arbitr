@@ -1,12 +1,13 @@
 # Base Bot abstract class
 class BaseBot
-  attr_reader :exchange, :symbol, :amount, :signal
+  attr_reader :exchange, :symbol, :amount, :signal, :price
 
-  def initialize(exchange, symbol, amount, signal)
+  def initialize(exchange, symbol, amount, price, signal)
     @exchange = exchange
     @symbol = symbol
     @amount = amount
     @signal = signal
+    @price = price
   end
 
   def sell_market!
@@ -24,9 +25,5 @@ class BaseBot
       type: 'market',
       amount: amount
     )
-  end
-
-  def symbol_price
-    @symbol_price ||= exchange.prices[symbol]
   end
 end

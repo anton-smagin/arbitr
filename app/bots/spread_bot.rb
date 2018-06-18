@@ -17,7 +17,7 @@ class SpreadBot < BaseBot
       if exchange.cancel_order(symbol, active_trade.sell_order_id)
         active_trade.update(
           status: 'sell_failed',
-          sell_price: symbol_price[:buy]
+          sell_price: price[:buy]
         )
         sell_market!
       end
@@ -45,9 +45,9 @@ class SpreadBot < BaseBot
       SpreadTrade.create(
         exchange: exchange.title,
         status: 'buying',
-        buy_price: symbol_price[:buy],
+        buy_price: price[:buy],
         buy_order_id: buy_order_id,
-        sell_price: symbol_price[:sell],
+        sell_price: price[:sell],
         amount: amount,
         symbol: symbol
       )
@@ -73,11 +73,11 @@ class SpreadBot < BaseBot
   end
 
   def corridor
-    [symbol_price[:buy] * (1 - CORRIDOR), symbol_price[:sell] * (1 + CORRIDOR)]
+    [price[:buy] * (1 - CORRIDOR), price[:sell] * (1 + CORRIDOR)]
   end
 
   def spread_difference
-    symbol_price[:sell] / symbol_price[:buy] * 100 - 100
+    price[:sell] / price[:buy] * 100 - 100
   end
 
   def active_trade
@@ -102,7 +102,7 @@ class SpreadBot < BaseBot
   def buy!
     exchange.make_order(
       symbol: symbol,
-      price: symbol_price[:buy],
+      price: price[:buy],
       direction: 'buy',
       type: 'limit',
       amount: amount

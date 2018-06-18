@@ -33,7 +33,9 @@
       <table class="table">
         <thead>
           <th></th>
+          <th>prev signal</th>
           <th>current signal</th>
+          <th>adx</th>
           <th>balance</th>
           <th>trade amount</th>
         </thead>
@@ -41,7 +43,9 @@
           <% @bot_statistic.each do |symbol, results| %>
             <tr>
               <td><%= symbol %></td>
-              <td><%= results[:signal] %></td>
+              <td><%= results[:signal][:prev_alligator] %></td>
+              <td><%= results[:signal][:alligator] %></td>
+              <td><%= results[:signal][:adx] %></td>
               <td><%= results[:balance] %></td>
               <td><%= results[:trade_amount] %></td>
             </tr>

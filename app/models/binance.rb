@@ -1,4 +1,5 @@
 # working with binance market
+# all assets at https://www.binance.com/assetWithdraw/getAllAsset.html
 class Binance < Exchange
   HOST = 'https://api.binance.com'.freeze
 
@@ -14,12 +15,11 @@ class Binance < Exchange
 
   def prices
     @prices ||=
-      public_get('/api/v1/ticker/24hr')
-      .parsed_response
+      symbols_info
       .select { |pair| %w[BTC SDT].include? pair['symbol'][-3..-1] }
       .map do |price|
         [price['symbol'],
-        { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f }]
+         { buy: price['bidPrice'].to_f, sell: price['askPrice'].to_f }]
       end.to_h
   end
 
@@ -152,6 +152,10 @@ class Binance < Exchange
     @exhange_info ||= public_get('/api/v1/exchangeInfo').parsed_response
   end
 
+  def symbols_info
+    @symbols_info ||= public_get('/api/v1/ticker/24hr').parsed_response
+  end
+
   def amount_to_precision(amount, symbol)
     lot_size = exchange_info['symbols']
                .find { |s| s['symbol'] == symbol }['filters'][1]['stepSize']
@@ -187,5 +191,28 @@ class Binance < Exchange
       'PENDING_CANCEL' => :pending_cancelled,
       'PARTIALLY_FILLED' => :partially_filled
     }
+  end
+
+  def test_data(end_interval, start_interval = 1)
+    (start_interval..end_interval).to_a.map do |n|
+      [
+        "#{n} hours ago",
+        symbols.map do |s|
+          Concurrent::Promise.new do
+            ticks = ticks symbol: s, interval: '1h', limit: 80, end_time:
+              n.hours.ago
+            {
+              adx: AdxIndicator.call(ticks),
+              alligator: AlligatorSignal.call(ticks),
+              price: ticks.last[:close],
+              symbol: s,
+              time: ticks.last[:open_time],
+              interval: '1h',
+              market: 'Binance'
+            }
+          end.execute
+        end
+      ]
+    end.to_h.transform_values { |v| v.map(&:value) }
   end
 end

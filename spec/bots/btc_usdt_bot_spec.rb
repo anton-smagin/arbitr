@@ -1,11 +1,11 @@
 require 'rails_helper'
 
 RSpec.describe BtcUsdtBot do
-  let(:signal) { :flat }
-  let(:bot) { BtcUsdtBot.new(exchange, signal) }
-  let(:prices) { { 'BTCUSDT' => { buy: 10_000, sell: 10_100 } } }
+  let(:signal) { { alligator: :flat } }
+  let(:bot) { BtcUsdtBot.new(exchange, prices, signal) }
+  let(:prices) { { buy: 10_000, sell: 10_100 } }
   let(:exchange) do
-    double(title: 'Livecoin', prices: prices, make_order: true, balance: 0.1 )
+    double(title: 'Livecoin', make_order: true, balance: 0.1 )
   end
 
   shared_examples 'it does nothing' do
@@ -23,7 +23,6 @@ RSpec.describe BtcUsdtBot do
       let(:exchange) do
         double(
           title: 'Livecoin',
-          prices: prices,
           balance: BtcUsdtBot::MIN_BTC_LOT
         )
       end
@@ -41,14 +40,14 @@ RSpec.describe BtcUsdtBot do
 
       it 'has amount that equals expected btc amount' do
         expect(bot.amount).to(
-          eq(BtcUsdtBot::MIN_BTC_LOT / prices['BTCUSDT'][:sell])
+          eq(BtcUsdtBot::MIN_BTC_LOT / prices[:sell])
         )
       end
     end
   end
 
   context 'sell signal' do
-    let(:signal) { :sell }
+    let(:signal) { { alligator: :sell } }
 
     it 'sells if sell signal' do
       expect(bot).to receive(:sell_market!) { 1 }

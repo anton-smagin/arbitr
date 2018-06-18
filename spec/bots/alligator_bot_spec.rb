@@ -3,26 +3,15 @@ require 'rails_helper'
 RSpec.describe AlligatorBot do
   let(:symbol) { 'ETHBTC' }
   let(:amount) { 0.5 }
-  let(:signal) { { symbol_signal: :buy, btc_signal: :flat } }
-  let(:bot) { AlligatorBot.new(exchange, symbol, amount, signal) }
-  let(:prices) do
-    prices = {}
-    prices[symbol] = { buy: 0.1, sell: 0.2 }
-    prices
-  end
-  let(:exchange) do
-    double(
-      title: 'Livecoin',
-      prices: prices,
-      make_order: true
-    )
-  end
+  let(:signal) { { alligator: :buy, prev_alligator: :flat, adx: 31 } }
+  let(:bot) { AlligatorBot.new(exchange, symbol, prices, signal) }
+  let(:prices) { { buy: 0.1, sell: 0.2 } }
+  let(:exchange) { double(title: 'Livecoin', make_order: true) }
 
   shared_examples 'does nothing' do
     it 'does nothing' do
       expect(bot).to_not receive(:buy_market!)
       bot.run
-      expect(AlligatorTrade.count).to eq 0
     end
   end
 
@@ -45,13 +34,13 @@ RSpec.describe AlligatorBot do
   end
 
   context 'buy signal' do
-    it 'buys' do
+    it 'buys trade amount of coins' do
       expect(bot).to receive(:buy_market!) { 1 }
       bot.run
       expect(AlligatorTrade.last).to have_attributes(
         buy_price: 0.2,
         symbol: symbol,
-        amount: amount
+        amount: AlligatorBot::TRADE_BTC_AMOUNT / prices[:sell]
       )
     end
 
@@ -68,15 +57,28 @@ RSpec.describe AlligatorBot do
   end
 
   context 'flat signal' do
-    let(:signal) { { symbol_signal: :flat, btc_signal: :flat }  }
+    let(:signal) { { alligator: :flat, alligator_prev: :flat, adx: 30 } }
 
     include_examples 'does nothing'
     include_examples 'sells if active trade'
   end
 
-  context 'not flat signal for BTC' do
-    let(:signal) { { symbol_signal: :flat, btc_signal: :buy } }
+  context 'a lot of active trades' do
+    before do
+      create_list(
+        :alligator_trade, 5, status: 'buying', exchange: exchange.title
+      )
+    end
     include_examples 'does nothing'
-    include_examples 'sells if active trade'
+  end
+
+  context 'adx < 30' do
+    let(:signal) { { alligator: :buy, alligator_prev: :flat, adx: 25 } }
+    include_examples 'does nothing'
+  end
+
+  context 'prev alligator eq buy' do
+    let(:signal) { { alligator: :buy, alligator_prev: :buy, adx: 31 } }
+    include_examples 'does nothing'
   end
 end

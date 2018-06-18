@@ -1,6 +1,6 @@
 class AlligatorSignal
   def self.call(ticks)
-    averages = ticks.map { |tick| tick.reduce(:+) / tick.size }
+    averages = ticks.map { |tick| tick[:high] + tick[:low] / 2 }
     m_as = {
       fast: averages.smma((ticks.size - 4), 8),
       middle:  averages.smma((ticks.size - 6), 13),
